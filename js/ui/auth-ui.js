@@ -48,6 +48,9 @@
       e.preventDefault();
       var email = document.getElementById('authSignInEmail').value.trim();
       var pass = document.getElementById('authSignInPassword').value;
+      var preSignInLocal = (root.userData && typeof root.userData.readLocalProjects === 'function')
+        ? (root.userData.readLocalProjects() || []).slice(0)
+        : getLocalProjectsFallback().slice(0);
       setStatus(t('Вход...', 'Signing in...'));
       root.auth.signIn(email, pass).then(function(res){
         if(!res.ok){
@@ -59,7 +62,7 @@
           analytics().capture('login_success', {method:'email_password'});
         }
         if(root.userData && root.userData.maybeOfferImportLocal){
-          root.userData.maybeOfferImportLocal().then(function(importRes){
+          root.userData.maybeOfferImportLocal(preSignInLocal).then(function(importRes){
             var skipped = importRes && importRes.reason === 'user_skipped';
             if(skipped){
               if(typeof window.renderCalcActions == 'function'){ window.renderCalcActions(); }

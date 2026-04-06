@@ -156,11 +156,11 @@
       });
   }
 
-  function maybeOfferImportLocal(){
+  function maybeOfferImportLocal(sourceList){
     if(!isAuthenticated()){
       return Promise.resolve({ok:false, reason:'guest'});
     }
-    var local = readLocalProjects();
+    var local = Array.isArray(sourceList) ? sourceList : readLocalProjects();
     if(!local.length){
       return Promise.resolve({ok:false, reason:'no_local'});
     }

@@ -157,14 +157,13 @@
     };
   }
 
-  function init(){
-    var sb = root.supabase && root.supabase.initClient ? root.supabase.initClient() : null;
+  function restoreSession(){
+    var sb = root.supabase && root.supabase.getClient ? root.supabase.getClient() : null;
     if(!sb){
       applyUser(null);
       notify('ready_no_client');
       return Promise.resolve({ok:false, reason:'no_client'});
     }
-
     return sb.auth.getSession().then(function(res){
       var user = res && res.data && res.data.session ? res.data.session.user : null;
       applyUser(user || null);
@@ -176,7 +175,18 @@
       applyUser(null);
       notify('session_restore_failed');
       return {ok:false, reason:'session_failed'};
-    }).then(function(result){
+    });
+  }
+
+  function init(){
+    var sb = root.supabase && root.supabase.initClient ? root.supabase.initClient() : null;
+    if(!sb){
+      applyUser(null);
+      notify('ready_no_client');
+      return Promise.resolve({ok:false, reason:'no_client'});
+    }
+
+    return restoreSession().then(function(result){
       sb.auth.onAuthStateChange(function(_event, session){
         var user = session && session.user ? session.user : null;
         applyUser(user || null);
@@ -198,6 +208,7 @@
     getUserPlan: getUserPlan,
     isProUser: isProUser,
     readProfile: readProfile,
+    restoreSession: restoreSession,
     onAuthStateChange: onAuthStateChange
   };
 })();

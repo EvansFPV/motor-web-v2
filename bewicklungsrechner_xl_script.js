@@ -788,6 +788,13 @@ function writeUserPresets(list){
 }
 
 function readSavedCalcs(){
+	var userData = window.MotorProduct && window.MotorProduct.userData;
+	if(userData && typeof userData.readLocalProjects == 'function'){
+		try{
+			var list = userData.readLocalProjects();
+			return list && list.length ? list : [];
+		}catch(e){}
+	}
 	try{
 		var raw = localStorage.getItem(SAVED_CALC_KEY);
 		if(!raw){ return []; }
@@ -799,6 +806,16 @@ function readSavedCalcs(){
 }
 
 function writeSavedCalcs(list){
+	var userData = window.MotorProduct && window.MotorProduct.userData;
+	if(userData && typeof userData.writeLocalProjects == 'function'){
+		try{
+			userData.writeLocalProjects(list);
+			if(typeof userData.scheduleSync == 'function'){
+				userData.scheduleSync(list || []);
+			}
+			return;
+		}catch(e){}
+	}
 	try{
 		localStorage.setItem(SAVED_CALC_KEY, JSON.stringify(list));
 	}catch(e){}
