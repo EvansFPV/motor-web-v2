@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  sanity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax check
+        run: |
+          node --check bewicklungsrechner_xl_script.js
+          node --check js/product/supabase.js
+          node --check js/product/auth.js
+          node --check js/product/user-data.js
+          node --check js/product/pro.js
+          node --check js/product/analytics.js
+          node --check js/product/paywall.js
+          node --check js/product/pricing.js
+          node --check js/product/presets.js
+          node --check js/product/entitlements.js
+          node --check js/product/onboarding.js
+          node --check js/ui/auth-ui.js
+          node --check js/ui/badges.js
+
+      - name: Calculator tests
+        run: node tests/check-calculator.js

@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MotorLab</title>
+  <meta name="theme-color" content="#0B1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MotorLab" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
+  <script>
+    (function(){
+      try{
+        var t = localStorage.getItem("ui_theme");
+        if(!t){ t = "light"; }
+        if(t === "dark"){
+          document.documentElement.classList.add("theme-dark");
+        }
+      }catch(e){}
+    })();
+  </script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
+  <link rel="stylesheet" href="./bewicklungsrechner_xl_style.css" />
+  <script>
+    window.MotorProductConfig = window.MotorProductConfig || {
+      supabaseUrl: "",
+      supabaseAnonKey: ""
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="app_header">
+      <div class="header_row">
+        <div>
+          <h1 data-i18n="title">MotorLab</h1>
+          <p data-i18n="subtitle">MotorLab — инструмент проектирования электродвигателей</p>
+        </div>
+        <div class="header_actions">
+          <span id="userChip" class="user_chip is_guest">Гость</span>
+          <button id="myProjectsBtn" class="auth_btn" type="button" data-i18n="auth_projects" hidden>Мои проекты</button>
+          <button id="authBtn" class="auth_btn" type="button" data-i18n="auth_login">Войти</button>
+          <button id="upgradeBtn" class="upgrade_btn" type="button">PRO</button>
+          <button id="installBtn" class="install_btn" type="button" data-i18n="install_app" hidden>Установить на телефон/ПК</button>
+          <button id="updateAppBtn" class="update_btn" type="button" data-i18n="update_app">Обновить приложение</button>
+          <span id="updateStatus" class="update_status" hidden aria-live="polite"></span>
+          <button id="themeToggle" class="theme_btn" type="button" data-i18n="theme_dark" aria-label="Переключить тему">🌙</button>
+          <button id="langToggle" class="lang_btn" type="button">EN</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Вкладки">
+      <button class="tab_btn is_active" data-tab-target="tab_calc" type="button" data-i18n="tab_calc">Калькулятор</button>
+      <button class="tab_btn" data-tab-target="tab_help" type="button" data-i18n="tab_help">Справка</button>
+      <button class="tab_btn" data-tab-target="tab_history" type="button" data-i18n="tab_history">История</button>
+    </nav>
+
+    <section id="tab_calc" class="tab_panel is_active">
+      <div class="toolbar">
+        <button id="quickExampleBtn" class="example_btn" type="button" data-i18n="example_btn">Готовый пример</button>
+        <button class="clear_btn" type="button" onclick="clearResult();" data-i18n="clear">Очистить результат</button>
+      </div>
+      <div id="jsContainer">
+        <span class="keinscript">Для работы калькулятора включите JavaScript.</span>
+      </div>
+    </section>
+
+    <section id="tab_help" class="tab_panel help_panel" aria-live="polite">
+      <div class="help_accordion">
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_quick">Как начать за 30 секунд</span></summary>
+          <div class="help_acc_body">
+            <div class="quick_start_card">
+              <p data-i18n="help_q1">1) Введите <strong>количество пазов</strong> и <strong>полюсов</strong>.</p>
+              <p data-i18n="help_q2">2) Нажмите <strong>«Рассчитать»</strong> (на телефоне — кнопку внизу экрана).</p>
+              <p data-i18n="help_q3">3) Смотрите схему намотки, коэффициент и выводы <strong>Начало/Конец A/B/C</strong>.</p>
+              <p data-i18n="help_q4">4) Для быстрого старта нажмите <strong>«Готовый пример»</strong>.</p>
+              <div class="quick_actions">
+                <button id="helpExampleBtn" class="example_btn" type="button" data-i18n="example_btn">Готовый пример</button>
+                <button id="helpTourBtn" class="tour_btn" type="button" data-i18n="start_tour">Мини-тур</button>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_params">Параметры</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_p1"><strong>Количество пазов</strong> — число пазов статора.</p>
+            <p data-i18n="help_p2"><strong>Количество полюсов</strong> — число магнитных полюсов ротора.</p>
+            <p data-i18n="help_p3"><strong>Тип соединения D/Y</strong> — «треугольник» (Delta) или «звезда» (Star).</p>
+            <p data-i18n="help_p4"><strong>Число слоёв (SPS)</strong> — однослойная или двухслойная укладка в пазах.</p>
+            <p data-i18n="help_p5"><strong>Укорочение шага</strong> — сдвиг шага обмотки для распределённых схем.</p>
+            <p data-i18n="help_p6"><strong>Режим «Схема»</strong> — ручной ввод буквами <code>A/B/C</code> и <code>a/b/c</code> вместо числа пазов.</p>
+            <p data-i18n="help_p7"><strong>Диаметр ротора по магнитам</strong> — нужен для перевода полюсного шага в миллиметры и расчета ширины магнита.</p>
+            <p data-i18n="help_p8"><strong>Режим магнита (Плавный ход / Сбалансированный / Момент)</strong> — задает базовый процент покрытия полюсного шага.</p>
+            <p data-i18n="help_p9"><strong>Воздушный зазор</strong> — участвует в предупреждениях по риску насыщения и практичности геометрии.</p>
+            <p data-i18n="help_p10"><strong>Толщина магнита</strong> — используется вместе с зазором для эвристической проверки «слишком агрессивной» геометрии.</p>
+            <p data-i18n="help_p11"><strong>Ограничение модели</strong> — это инженерная рекомендация ширины магнита по дуге, а не полный электромагнитный расчет ротора.</p>
+            <h2 data-i18n="help_adv_title">Расширенный коэффициент обмотки: как пользоваться</h2>
+            <p data-i18n="help_adv_1">1) Нажмите <strong>«Рассчитать»</strong>, затем откройте <strong>«расширенный»</strong> под строкой коэффициента обмотки.</p>
+            <p data-i18n="help_adv_2">2) В блоке <strong>коэффициента заполнения паза</strong> введите <strong>диаметр статора</strong> и <strong>ширину паза</strong>, включите чекбокс «в таблицу» для применения.</p>
+            <p data-i18n="help_adv_3">3) В блоке <strong>скоса пазов</strong> введите величину скоса (в пазах), включите чекбокс «в таблицу», если хотите учесть скос.</p>
+            <p data-i18n="help_adv_4">4) Нажмите <strong>«Применить»</strong> в расширенном блоке. Таблица пересчитается: без галочек — базовый коэффициент, с одной/двумя галочками — с учетом выбранных поправок.</p>
+            <p data-i18n="help_adv_5">5) Если поле подсвечивается и значение сбрасывается в 0, значит введено некорректное число (пусто, 0 или не число).</p>
+            <p data-i18n="help_adv_6">6) Для блока <strong>Рекомендация по магниту</strong> введите диаметр по магнитам и выберите режим: плавный ход / сбалансированный / момент.</p>
+            <p data-i18n="help_adv_7">7) После основного расчета появятся: <strong>Полюсный шаг</strong>, <strong>Рекомендуемое покрытие</strong>, <strong>Рекомендуемая ширина</strong> и <strong>Рабочий диапазон</strong>.</p>
+            <p data-i18n="help_adv_8">8) Дополнительно введите <strong>Воздушный зазор</strong> и <strong>Толщину магнита</strong>, чтобы увидеть предупреждения уровня 2 (коггинг/риск насыщения/запас магнитопровода ротора).</p>
+            <p data-i18n="help_adv_9">9) Учитывайте ограничение: итоговый выбор магнита всегда проверяется по реальной геометрии мотора и цели по KV/моменту.</p>
+            <div class="help_steps">
+              <article class="help_step">
+                <div class="help_step_num">1</div>
+                <p data-i18n="help_adv_card1"><strong>База:</strong> нажмите «Рассчитать», чтобы построить исходную схему и базовый коэффициент.</p>
+              </article>
+              <article class="help_step">
+                <div class="help_step_num">2</div>
+                <p data-i18n="help_adv_card2"><strong>Коэффициент паза:</strong> введите диаметр/ширину и включите чекбокс для учета в таблице.</p>
+              </article>
+              <article class="help_step">
+                <div class="help_step_num">3</div>
+                <p data-i18n="help_adv_card3"><strong>Скос:</strong> задайте скос в пазах и включите чекбокс, если хотите учитывать скос.</p>
+              </article>
+              <article class="help_step">
+                <div class="help_step_num">4</div>
+                <p data-i18n="help_adv_card4"><strong>Применение:</strong> нажмите «Применить» и сравните обновленный коэффициент в таблице.</p>
+              </article>
+            </div>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_table">Таблица типовых сочетаний</span></summary>
+          <div class="help_acc_body">
+            <div class="table_wrap">
+              <table class="ref_table" aria-label="Таблица сочетаний обмотки">
+          <thead>
+            <tr>
+              <th class="th_side">Полюса \\ Пазы</th>
+              <th>3</th>
+              <th>6</th>
+              <th>9</th>
+              <th>12</th>
+              <th>15</th>
+              <th>18</th>
+              <th class="th_side">Укорочение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>2</th>
+              <td class="ok2">ABC</td>
+              <td class="warn">ABCabc</td>
+              <td class="warn">AacBBaCCb</td>
+              <td class="warn">AAccBBaaCCbb</td>
+              <td class="warn">AACCbbaaCCCbb</td>
+              <td class="warn">AAaccBBBaaaCCCbbb</td>
+              <td>1</td>
+            </tr>
+            <tr>
+              <th>4</th>
+              <td class="ok2">ABC</td>
+              <td class="ok2">ABCABC</td>
+              <td class="warn">ABaCAcBCb</td>
+              <td class="warn">AcBaCbAcBaCb</td>
+              <td class="warn">AcBaCCbAcBBaCb</td>
+              <td class="warn">AaCBaCCbAAcBBaCCb</td>
+              <td>2</td>
+            </tr>
+            <tr>
+              <th>6</th>
+              <td class="bad">—</td>
+              <td class="bad">—</td>
+              <td class="ok1">ABCABCABC</td>
+              <td class="bad">—</td>
+              <td class="bad">—</td>
+              <td class="warn">AcBaCbaCBaCbaCBcb</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <th>8</th>
+              <td class="warn">ABC</td>
+              <td class="ok2">ABCABC</td>
+              <td class="ok2">AaABbBCcC</td>
+              <td class="warn">ABCABCABCABC</td>
+              <td class="warn">AcaCAbabABCbcBc</td>
+              <td class="warn">ABaCAcBCbABaCacBCb</td>
+              <td>4</td>
+            </tr>
+            <tr>
+              <th>10</th>
+              <td class="warn">ABC</td>
+              <td class="ok1">AbCaBc</td>
+              <td class="ok2">AaABbBCcC</td>
+              <td class="ok2">AbBCcaABbcC</td>
+              <td class="warn">ABCABCABCABCABC</td>
+              <td class="warn">AcabABCbcaCABabCBc</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <th>12</th>
+              <td class="bad">—</td>
+              <td class="bad">—</td>
+              <td class="ok1">ABCABCABC</td>
+              <td class="bad">—</td>
+              <td class="bad">—</td>
+              <td class="ok2">ABCABCABCABCABCABC</td>
+              <td>6</td>
+            </tr>
+            <tr>
+              <th>14</th>
+              <td class="warn">ABC</td>
+              <td class="warn">AcBaCb</td>
+              <td class="ok1">ACaBAbCbC</td>
+              <td class="ok2">AacCBbaACcbB</td>
+              <td class="ok2">AaAaABbbBbDCcCcC</td>
+              <td class="ok1">AabcCABbcaABCcabbC</td>
+              <td>7</td>
+            </tr>
+            <tr>
+              <th>16</th>
+              <td class="warn">ABC</td>
+              <td class="warn">ABCABC</td>
+              <td class="warn">AAbCcAaBBc</td>
+              <td class="ok1">ABCABCABCABC</td>
+              <td class="ok2">AaaAaCceCcCbbBbB</td>
+              <td class="ok2">AaABbBCcCAaABbBCcC</td>
+              <td>8</td>
+            </tr>
+            <tr>
+              <th>20</th>
+              <td colspan="5" class="na">нет данных</td>
+              <td class="ok2">AaABbBCcCAaABbBCcC</td>
+              <td>10</td>
+            </tr>
+          </tbody>
+              </table>
+            </div>
+            <p class="table_note" data-i18n="note_table">
+              Цвета ячеек: синий — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.
+            </p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_read">Как читать результат</span></summary>
+          <div class="help_acc_body">
+            <h2 data-i18n="help_phase_title">Что означают A/B/C и a/b/c</h2>
+            <p data-i18n="help_phase_1"><strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — синий, C — зелёный.</p>
+            <p data-i18n="help_phase_2"><strong>Заглавная буква</strong> (A/B/C) и <strong>строчная</strong> (a/b/c) показывают противоположные направления тока в активной стороне катушки.</p>
+            <p data-i18n="help_phase_3"><strong>Пример:</strong> если в схеме идут <code>A</code> и затем <code>a</code>, это одна и та же фаза, но с обратным направлением.</p>
+            <p data-i18n="help_r3"><strong>Анимация намотки</strong> — пошаговая визуализация укладки.</p>
+            <p data-i18n="help_r4"><strong>НОК (LCM)</strong> — число шагов коггинга на один оборот.</p>
+            <p data-i18n="help_r5"><strong>Коэффициент обмотки</strong> — эффективность выбранной схемы по ЭДС.</p>
+            <p data-i18n="help_r6"><strong>Старт / Конец A/B/C</strong> — выводы начала и конца каждой фазы для подключения.</p>
+            <p data-i18n="help_r7"><strong>-</strong> в строке схемы означает пустой паз (без активной стороны катушки).</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_rules">Быстрые правила</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_rule1">Количество пазов должно делиться на 3.</p>
+            <p data-i18n="help_rule2">Количество полюсов должно быть четным.</p>
+            <p data-i18n="help_rule3">Количество пазов и полюсов не должно быть одинаковым.</p>
+            <p data-i18n="help_rule4">Слишком «красные/оранжевые» комбинации обычно дают худший крутящий момент и более высокий шум.</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_examples">Практические примеры</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_ex1"><strong>9 пазов / 12 полюсов</strong> — практичная стартовая точка для малых BLDC: обычно хороший баланс коэффициента, технологичности и предсказуемого запуска.</p>
+            <p data-i18n="help_ex2"><strong>Выбор D/Y:</strong> <strong>D</strong> чаще выбирают для более «силового» режима (больше ток/момент), <strong>Y</strong> — для более мягкого старта и более высокого напряжения на оборот.</p>
+            <p data-i18n="help_ex3"><strong>Быстрый отбор схем:</strong> сначала отбрасывайте варианты с плохим балансом фаз и низким коэффициентом, затем сравнивайте оставшиеся по коггингу (LCM/KgV) и удобству намотки.</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_checks">Как быстро проверить себя</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_c1">1) Убедитесь, что фазы A/B/C распределены равномерно по кругу.</p>
+            <p data-i18n="help_c2">2) Проверьте, что число верхнего и нижнего регистра по каждой фазе близко к равному.</p>
+            <p data-i18n="help_c3">3) Сравните несколько вариантов по <strong>коэффициенту обмотки</strong> и выберите более высокий при допустимом коггинге.</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_magnet_title">Магнитная рекомендация (подробно)</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_m1"><strong>Базовая формула:</strong> полюсный шаг = π × диаметр ротора по магнитам / число полюсов.</p>
+            <p data-i18n="help_m2"><strong>Рекомендуемая ширина магнита:</strong> полюсный шаг × коэффициент покрытия.</p>
+            <p data-i18n="help_m3"><strong>Режимы покрытия:</strong> Плавный ход = 70%, Сбалансированный = 75%, Момент = 80% (с рабочими диапазонами).</p>
+            <p data-i18n="help_m4"><strong>Поправка по KgV:</strong> при более «жесткой» комбинации коэффициент немного уменьшается (без увеличения выше базового).</p>
+            <p data-i18n="help_m5"><strong>Что показывается в результате:</strong> полюсный шаг, покрытие %, рекомендуемая ширина и рабочий диапазон в мм.</p>
+            <p data-i18n="help_m6"><strong>Проверки V2:</strong> высокий coverage, малый зазор, большая толщина, малый запас rotor/stator — это эвристики для раннего предупреждения.</p>
+            <p data-i18n="help_m7"><strong>Важно:</strong> это не FEA и не полный расчёт ротора; итог подтверждается по реальной геометрии и цели по KV/моменту.</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_data_title">История, экспорт, пресеты и ссылка</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_d1"><strong>Сохранить:</strong> сохраняет текущий расчёт (включая магнитные входы и результат) в историю браузера.</p>
+            <p data-i18n="help_d2"><strong>Избранное:</strong> отметьте расчёты звездой и включите фильтр «Только избранное» во вкладке История.</p>
+            <p data-i18n="help_d3"><strong>Экспорт JSON/CSV:</strong> выгружает текущий расчёт. В CSV есть поля магнита: режим, покрытие, ширина, диапазон.</p>
+            <p data-i18n="help_d4"><strong>Share-ссылка:</strong> формирует ссылку на базовый расчёт (пазы/полюса или схема), чтобы быстро поделиться.</p>
+            <p data-i18n="help_d5"><strong>Пресеты:</strong> используйте готовые и свои пользовательские пресеты для быстрого старта.</p>
+          </div>
+        </details>
+
+        <details class="help_acc_item" open>
+          <summary><span data-i18n="help_ui_title">Режимы отображения, тема и установка</span></summary>
+          <div class="help_acc_body">
+            <p data-i18n="help_u1"><strong>Режимы визуализации:</strong> «Намотка», «Электрическая диаграмма», «Таблица» — переключаются в панели над расширенным видом.</p>
+            <p data-i18n="help_u2"><strong>Фильтр фазы:</strong> можно выделить одну фазу (A/B/C) или показать все сразу.</p>
+            <p data-i18n="help_u3"><strong>Дополнительные слои:</strong> включайте/выключайте направление тока и номера пазов.</p>
+            <p data-i18n="help_u4"><strong>Тема:</strong> переключатель в шапке меняет светлую/тёмную тему и запоминается локально.</p>
+            <p data-i18n="help_u5"><strong>PWA:</strong> кнопку «Установить на телефон/ПК» можно использовать для установки как приложения; базовая работа доступна офлайн через service worker.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+    <section id="tab_history" class="tab_panel history_panel" aria-live="polite">
+      <div class="history_toolbar">
+        <input id="history_search" class="history_search" type="search" placeholder="Поиск..." data-i18n-placeholder="history_search_ph" />
+        <label class="history_fav_toggle">
+          <input id="history_fav_only" type="checkbox" />
+          <span data-i18n="history_only_fav">Только избранное</span>
+        </label>
+      </div>
+      <div id="history_list" class="history_list"></div>
+    </section>
+  </main>
+
+  <div id="tourOverlay" class="tour_overlay" hidden>
+    <div class="tour_modal" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+      <div class="tour_head">
+        <strong id="tourTitle">Мини-тур</strong>
+        <span id="tourStep" class="tour_step">1 / 3</span>
+      </div>
+      <p id="tourText"></p>
+      <div class="tour_actions">
+        <button id="tourSkipBtn" type="button" class="tour_btn ghost" data-i18n="tour_skip">Пропустить</button>
+        <button id="tourNextBtn" type="button" class="tour_btn" data-i18n="tour_next">Далее</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/product/supabase.js"></script>
+  <script src="./js/product/auth.js"></script>
+  <script src="./js/product/user-data.js"></script>
+  <script src="./js/product/pricing.js"></script>
+  <script src="./js/product/entitlements.js"></script>
+  <script src="./js/product/analytics.js"></script>
+  <script src="./js/product/pro.js"></script>
+  <script src="./js/product/presets.js"></script>
+  <script src="./js/product/billing.js"></script>
+  <script src="./js/product/paywall.js"></script>
+  <script src="./js/product/onboarding.js"></script>
+  <script src="./js/ui/badges.js"></script>
+  <script src="./js/ui/auth-ui.js"></script>
+  <script src="./bewicklungsrechner_xl_script.js"></script>
+  <script>
+    (function () {
+      var tabButtons = document.querySelectorAll(".tab_btn");
+      var tabPanels = document.querySelectorAll(".tab_panel");
+      var helpAccordion = document.querySelector(".help_accordion");
+      var helpAnimTimer = 0;
+      function animateHelpAccordion(){
+        if (!helpAccordion) {
+          return;
+        }
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+        var items = helpAccordion.querySelectorAll(".help_acc_item");
+        for (var i = 0; i < items.length; i++) {
+          items[i].style.setProperty("--help-delay", (i * 0.045) + "s");
+        }
+        helpAccordion.classList.remove("is_animating");
+        void helpAccordion.offsetWidth;
+        helpAccordion.classList.add("is_animating");
+        clearTimeout(helpAnimTimer);
+        helpAnimTimer = setTimeout(function(){
+          helpAccordion.classList.remove("is_animating");
+        }, 680);
+      }
+      function activateTab(targetId){
+        for (var b = 0; b < tabButtons.length; b++) {
+          tabButtons[b].classList.remove("is_active");
+        }
+        for (var p = 0; p < tabPanels.length; p++) {
+          tabPanels[p].classList.remove("is_active");
+        }
+        for (var i = 0; i < tabButtons.length; i++) {
+          if (tabButtons[i].getAttribute("data-tab-target") === targetId) {
+            tabButtons[i].classList.add("is_active");
+          }
+        }
+        var target = document.getElementById(targetId);
+        if (target) {
+          target.classList.add("is_active");
+          target.classList.remove("is_reveal");
+          void target.offsetWidth;
+          target.classList.add("is_reveal");
+          setTimeout(function(){
+            target.classList.remove("is_reveal");
+          }, 420);
+        }
+        if (targetId === "tab_help") {
+          animateHelpAccordion();
+        }
+      }
+
+      for (var i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].addEventListener("click", function () {
+          var target = this.getAttribute("data-tab-target");
+          activateTab(target);
+          if (target === "tab_history" && typeof refreshHistoryTab === "function") {
+            refreshHistoryTab();
+            if (window.MotorProduct && window.MotorProduct.analytics) {
+              window.MotorProduct.analytics.capture("history_opened", {});
+            }
+          }
+          if (target === "tab_help" && window.MotorProduct && window.MotorProduct.analytics) {
+            window.MotorProduct.analytics.capture("help_opened", {});
+          }
+        });
+      }
+
+      document.addEventListener("pointerdown", function(e){
+        var node = e.target;
+        if (!node || !node.closest) {
+          return;
+        }
+        var tapTarget = node.closest("button, summary, .calc_action_btn, .tab_btn");
+        if (!tapTarget) {
+          return;
+        }
+        tapTarget.classList.add("is_tap_btn");
+        setTimeout(function(){
+          tapTarget.classList.remove("is_tap_btn");
+        }, 150);
+      });
+
+      var locale = "ru";
+      var currentTheme = document.documentElement.classList.contains("theme-dark") ? "dark" : "light";
+      function initMobilePlatformTweaks(){
+        var ua = (navigator.userAgent || "").toLowerCase();
+        var mobileMQ = window.matchMedia("(max-width: 900px)");
+        if (/iphone|ipad|ipod/.test(ua)) {
+          document.documentElement.classList.add("platform-ios");
+        } else if (/android/.test(ua)) {
+          document.documentElement.classList.add("platform-android");
+        }
+        var body = document.body;
+        var vv = window.visualViewport || null;
+        var baseVVHeight = vv ? vv.height : window.innerHeight;
+        var rafId = 0;
+        var rotateTimer = 0;
+        var resizeTimer = 0;
+        var focusOutTimer = 0;
+        var lastBottomOffset = 0;
+        var keyboardWasOpen = false;
+        var maxVVHeight = vv ? vv.height : window.innerHeight;
+
+        if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) {
+          document.documentElement.classList.add("display-standalone");
+        }
+        if (window.navigator && window.navigator.standalone) {
+          document.documentElement.classList.add("display-standalone");
+        }
+
+        function hasTextInputFocus(){
+          var el = document.activeElement;
+          if (!el || !el.tagName) {
+            return false;
+          }
+          var tag = el.tagName.toLowerCase();
+          if (tag === "textarea" || tag === "select" || el.isContentEditable) {
+            return true;
+          }
+          if (tag !== "input") {
+            return false;
+          }
+          var type = (el.type || "").toLowerCase();
+          return !/^(button|checkbox|color|file|hidden|image|radio|range|reset|submit)$/.test(type);
+        }
+
+        function syncKeyboardClass(){
+          if (!body) {
+            return;
+          }
+          var open = body.classList.contains("kbd_open_input") || body.classList.contains("kbd_open_vv");
+          body.classList.toggle("kbd_open", open);
+        }
+
+        function syncViewportMetrics(){
+          if (!vv) {
+            return;
+          }
+          if (!mobileMQ.matches) {
+            body.classList.remove("kbd_open_vv");
+            body.classList.remove("kbd_open_input");
+            syncKeyboardClass();
+            document.documentElement.style.setProperty("--vv-bottom-offset", "0px");
+            return;
+          }
+          var focused = hasTextInputFocus();
+          if (!focused && !keyboardWasOpen && vv.height > maxVVHeight) {
+            maxVVHeight = vv.height;
+          }
+          var baseline = Math.max(baseVVHeight, maxVVHeight);
+          var heightDrop = baseline - vv.height;
+          var keyboardLikely = false;
+          if (focused) {
+            keyboardLikely = (heightDrop > 90 || vv.offsetTop > 0);
+          } else if (keyboardWasOpen) {
+            keyboardLikely = (heightDrop > 52 || vv.offsetTop > 0);
+          }
+          body.classList.toggle("kbd_open_vv", keyboardLikely);
+          var bottomOffset = keyboardLikely
+            ? Math.max(0, Math.round(window.innerHeight - (vv.height + vv.offsetTop)))
+            : 0;
+          if (Math.abs(bottomOffset - lastBottomOffset) < 2) {
+            bottomOffset = lastBottomOffset;
+          } else {
+            lastBottomOffset = bottomOffset;
+          }
+          document.documentElement.style.setProperty("--vv-bottom-offset", bottomOffset + "px");
+          keyboardWasOpen = keyboardLikely;
+          if (!keyboardLikely && vv.height > baseVVHeight) {
+            baseVVHeight = vv.height;
+            maxVVHeight = Math.max(maxVVHeight, vv.height);
+          }
+          syncKeyboardClass();
+        }
+
+        function queueViewportSync(){
+          if (!vv) {
+            return;
+          }
+          if (rafId) {
+            cancelAnimationFrame(rafId);
+          }
+          rafId = requestAnimationFrame(function(){
+            rafId = 0;
+            syncViewportMetrics();
+          });
+        }
+
+        function triggerMobileRelayout(){
+          if (typeof syncHelpAccordion === "function") {
+            syncHelpAccordion();
+          }
+          if (body.classList.contains("kbd_open")) {
+            return;
+          }
+          if (typeof handleMobileViewportChange === "function") {
+            handleMobileViewportChange();
+          }
+        }
+
+        document.addEventListener("focusin", function(e){
+          if (!mobileMQ.matches) {
+            return;
+          }
+          clearTimeout(focusOutTimer);
+          var t = e.target;
+          if (!t || !t.tagName) {
+            return;
+          }
+          var tag = t.tagName.toLowerCase();
+          if (tag === "input" || tag === "textarea" || tag === "select" || t.isContentEditable) {
+            body.classList.add("kbd_open_input");
+            syncKeyboardClass();
+          }
+        });
+        document.addEventListener("focusout", function(){
+          if (!mobileMQ.matches) {
+            return;
+          }
+          clearTimeout(focusOutTimer);
+          focusOutTimer = setTimeout(function(){
+            if (!hasTextInputFocus()) {
+              body.classList.remove("kbd_open_input");
+            }
+            syncKeyboardClass();
+            queueViewportSync();
+          }, 160);
+        });
+
+        if (vv) {
+          vv.addEventListener("resize", queueViewportSync);
+          vv.addEventListener("scroll", queueViewportSync);
+          queueViewportSync();
+        }
+
+        window.addEventListener("orientationchange", function(){
+          clearTimeout(rotateTimer);
+          rotateTimer = setTimeout(function(){
+            if (vv) {
+              baseVVHeight = vv.height;
+              maxVVHeight = vv.height;
+              lastBottomOffset = 0;
+              keyboardWasOpen = false;
+              queueViewportSync();
+            }
+            triggerMobileRelayout();
+          }, 300);
+        });
+
+        window.addEventListener("resize", function(){
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function(){
+            if (vv) {
+              if (Math.abs(vv.height - baseVVHeight) < 90) {
+                baseVVHeight = vv.height;
+                maxVVHeight = Math.max(maxVVHeight, vv.height);
+              }
+              queueViewportSync();
+            }
+            if (!mobileMQ.matches) {
+              body.classList.remove("kbd_open_vv");
+              body.classList.remove("kbd_open_input");
+              syncKeyboardClass();
+              document.documentElement.style.setProperty("--vv-bottom-offset", "0px");
+              lastBottomOffset = 0;
+              keyboardWasOpen = false;
+            }
+            triggerMobileRelayout();
+          }, 160);
+        });
+
+        document.addEventListener("visibilitychange", function(){
+          if (document.visibilityState !== "visible") {
+            return;
+          }
+          setTimeout(function(){
+            if (vv) {
+              if (!hasTextInputFocus()) {
+                baseVVHeight = vv.height;
+                maxVVHeight = vv.height;
+              }
+              queueViewportSync();
+            }
+            triggerMobileRelayout();
+          }, 80);
+        });
+
+        window.addEventListener("pageshow", function(){
+          if (vv) {
+            if (!hasTextInputFocus()) {
+              baseVVHeight = vv.height;
+              maxVVHeight = vv.height;
+            }
+            queueViewportSync();
+          }
+          triggerMobileRelayout();
+        });
+      }
+      var dict = {
+        ru: {
+          title: "MotorLab",
+          subtitle: "MotorLab — инструмент проектирования электродвигателей",
+          tab_calc: "Калькулятор",
+          tab_help: "Справка",
+          tab_history: "История",
+          theme_dark: "Тёмная тема",
+          theme_light: "Светлая тема",
+          auth_login: "Войти",
+          auth_projects: "Мои проекты",
+          install_app: "Установить на телефон/ПК",
+          installed_app: "Приложение установлено",
+          update_app: "Обновить приложение",
+          example_btn: "Готовый пример",
+          start_tour: "Мини-тур",
+          tour_skip: "Пропустить",
+          tour_next: "Далее",
+          tour_finish: "Готово",
+          clear: "Очистить результат",
+          help_quick: "Как начать за 30 секунд",
+          help_q1: "1) Введите <strong>количество пазов</strong> и <strong>полюсов</strong>.",
+          help_q2: "2) Нажмите <strong>«Рассчитать»</strong> (на телефоне — кнопку внизу экрана).",
+          help_q3: "3) Смотрите схему намотки, коэффициент и выводы <strong>Начало/Конец A/B/C</strong>.",
+          help_q4: "4) Для быстрого старта нажмите <strong>«Готовый пример»</strong>.",
+          help_params: "Параметры",
+          help_p1: "<strong>Количество пазов</strong> — число пазов статора.",
+          help_p2: "<strong>Количество полюсов</strong> — число магнитных полюсов ротора.",
+          help_p3: "<strong>Тип соединения D/Y</strong> — «треугольник» или «звезда».",
+          help_p4: "<strong>Число слоёв (SPS)</strong> — однослойная или двухслойная укладка в пазах.",
+          help_p5: "<strong>Укорочение шага</strong> — сдвиг шага обмотки для распределённых схем.",
+          help_p6: "<strong>Режим «Схема»</strong> — ручной ввод буквами <code>A/B/C</code> и <code>a/b/c</code> вместо числа пазов.",
+          help_p7: "<strong>Диаметр ротора по магнитам</strong> — нужен для перевода полюсного шага в миллиметры и расчета ширины магнита.",
+          help_p8: "<strong>Режим магнита (Плавный ход / Сбалансированный / Момент)</strong> — задает базовый процент покрытия полюсного шага.",
+          help_p9: "<strong>Воздушный зазор</strong> — участвует в предупреждениях по риску насыщения и практичности геометрии.",
+          help_p10: "<strong>Толщина магнита</strong> — используется вместе с зазором для эвристической проверки «слишком агрессивной» геометрии.",
+          help_p11: "<strong>Ограничение модели</strong> — это инженерная рекомендация ширины магнита по дуге, а не полный электромагнитный расчет ротора.",
+          help_adv_title: "Расширенный коэффициент обмотки: как пользоваться",
+          help_adv_1: "1) Нажмите <strong>«Рассчитать»</strong>, затем откройте <strong>«расширенный»</strong> под строкой коэффициента обмотки.",
+          help_adv_2: "2) В блоке <strong>коэффициента заполнения паза</strong> введите <strong>диаметр статора</strong> и <strong>ширину паза</strong>, включите чекбокс «в таблицу» для применения.",
+          help_adv_3: "3) В блоке <strong>скоса пазов</strong> введите величину скоса (в пазах), включите чекбокс «в таблицу», если хотите учесть скос.",
+          help_adv_4: "4) Нажмите <strong>«Применить»</strong> в расширенном блоке. Таблица пересчитается: без галочек — базовый коэффициент, с одной/двумя галочками — с учетом выбранных поправок.",
+          help_adv_5: "5) Если поле подсвечивается и значение сбрасывается в 0, значит введено некорректное число (пусто, 0 или не число).",
+          help_adv_6: "6) Для блока <strong>Рекомендация по магниту</strong> введите диаметр по магнитам и выберите режим: плавный ход / сбалансированный / момент.",
+          help_adv_7: "7) После основного расчета появятся: <strong>Полюсный шаг</strong>, <strong>Рекомендуемое покрытие</strong>, <strong>Рекомендуемая ширина</strong> и <strong>Рабочий диапазон</strong>.",
+          help_adv_8: "8) Дополнительно введите <strong>Воздушный зазор</strong> и <strong>Толщину магнита</strong>, чтобы увидеть предупреждения уровня 2 (коггинг/риск насыщения/запас магнитопровода ротора).",
+          help_adv_9: "9) Учитывайте ограничение: итоговый выбор магнита всегда проверяется по реальной геометрии мотора и цели по KV/моменту.",
+          help_adv_card1: "<strong>База:</strong> нажмите «Рассчитать», чтобы построить исходную схему и базовый коэффициент.",
+          help_adv_card2: "<strong>Коэффициент паза:</strong> введите диаметр/ширину и включите чекбокс для учета в таблице.",
+          help_adv_card3: "<strong>Скос:</strong> задайте скос в пазах и включите чекбокс, если хотите учитывать скос.",
+          help_adv_card4: "<strong>Применение:</strong> нажмите «Применить» и сравните обновленный коэффициент в таблице.",
+          help_table: "Таблица типовых сочетаний",
+          note_table: "Цвета ячеек: синий — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.",
+          help_read: "Как читать результат",
+          help_phase_title: "Что означают A/B/C и a/b/c",
+          help_phase_1: "<strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — синий, C — зелёный.",
+          help_phase_2: "<strong>Заглавная буква</strong> (A/B/C) и <strong>строчная</strong> (a/b/c) показывают противоположные направления тока в активной стороне катушки.",
+          help_phase_3: "<strong>Пример:</strong> если в схеме идут <code>A</code> и затем <code>a</code>, это одна и та же фаза, но с обратным направлением.",
+          help_r3: "<strong>Анимация намотки</strong> — пошаговая визуализация укладки.",
+          help_r4: "<strong>НОК (LCM)</strong> — число шагов коггинга на один оборот.",
+          help_r5: "<strong>Коэффициент обмотки</strong> — эффективность выбранной схемы по ЭДС.",
+          help_r6: "<strong>Старт / Конец A/B/C</strong> — выводы начала и конца каждой фазы для подключения.",
+          help_r7: "<strong>-</strong> в строке схемы означает пустой паз (без активной стороны катушки).",
+          help_rules: "Быстрые правила",
+          help_rule1: "Количество пазов должно делиться на 3.",
+          help_rule2: "Количество полюсов должно быть четным.",
+          help_rule3: "Количество пазов и полюсов не должно быть одинаковым.",
+          help_rule4: "Слишком «красные/оранжевые» комбинации обычно дают худший крутящий момент и более высокий шум.",
+          help_examples: "Практические примеры",
+          help_ex1: "<strong>9 пазов / 12 полюсов</strong> — практичная стартовая точка для малых BLDC: обычно хороший баланс коэффициента, технологичности и предсказуемого запуска.",
+          help_ex2: "<strong>Выбор D/Y:</strong> <strong>D</strong> чаще выбирают для более «силового» режима (больше ток/момент), <strong>Y</strong> — для более мягкого старта и более высокого напряжения на оборот.",
+          help_ex3: "<strong>Быстрый отбор схем:</strong> сначала отбрасывайте варианты с плохим балансом фаз и низким коэффициентом, затем сравнивайте оставшиеся по коггингу (LCM/KgV) и удобству намотки.",
+          help_checks: "Как быстро проверить себя",
+          help_c1: "1) Убедитесь, что фазы A/B/C распределены равномерно по кругу.",
+          help_c2: "2) Проверьте, что число верхнего и нижнего регистра по каждой фазе близко к равному.",
+          help_c3: "3) Сравните несколько вариантов по <strong>коэффициенту обмотки</strong> и выберите более высокий при допустимом коггинге.",
+          help_magnet_title: "Магнитная рекомендация (подробно)",
+          help_m1: "<strong>Базовая формула:</strong> полюсный шаг = π × диаметр ротора по магнитам / число полюсов.",
+          help_m2: "<strong>Рекомендуемая ширина магнита:</strong> полюсный шаг × коэффициент покрытия.",
+          help_m3: "<strong>Режимы покрытия:</strong> Плавный ход = 70%, Сбалансированный = 75%, Момент = 80% (с рабочими диапазонами).",
+          help_m4: "<strong>Поправка по KgV:</strong> при более «жесткой» комбинации коэффициент немного уменьшается (без увеличения выше базового).",
+          help_m5: "<strong>Что показывается в результате:</strong> полюсный шаг, покрытие %, рекомендуемая ширина и рабочий диапазон в мм.",
+          help_m6: "<strong>Проверки V2:</strong> высокий coverage, малый зазор, большая толщина, малый запас rotor/stator — это эвристики для раннего предупреждения.",
+          help_m7: "<strong>Важно:</strong> это не FEA и не полный расчёт ротора; итог подтверждается по реальной геометрии и цели по KV/моменту.",
+          help_data_title: "История, экспорт, пресеты и ссылка",
+          help_d1: "<strong>Сохранить:</strong> сохраняет текущий расчёт (включая магнитные входы и результат) в историю браузера.",
+          help_d2: "<strong>Избранное:</strong> отметьте расчёты звездой и включите фильтр «Только избранное» во вкладке История.",
+          help_d3: "<strong>Экспорт JSON/CSV:</strong> выгружает текущий расчёт. В CSV есть поля магнита: режим, покрытие, ширина, диапазон.",
+          help_d4: "<strong>Share-ссылка:</strong> формирует ссылку на базовый расчёт (пазы/полюса или схема), чтобы быстро поделиться.",
+          help_d5: "<strong>Пресеты:</strong> используйте готовые и свои пользовательские пресеты для быстрого старта.",
+          help_ui_title: "Режимы отображения, тема и установка",
+          help_u1: "<strong>Режимы визуализации:</strong> «Намотка», «Электрическая диаграмма», «Таблица» — переключаются в панели над расширенным видом.",
+          help_u2: "<strong>Фильтр фазы:</strong> можно выделить одну фазу (A/B/C) или показать все сразу.",
+          help_u3: "<strong>Дополнительные слои:</strong> включайте/выключайте направление тока и номера пазов.",
+          help_u4: "<strong>Тема:</strong> переключатель в шапке меняет светлую/тёмную тему и запоминается локально.",
+          help_u5: "<strong>PWA:</strong> кнопку «Установить на телефон/ПК» можно использовать для установки как приложения; базовая работа доступна офлайн через service worker.",
+          history_search_ph: "Поиск по истории...",
+          history_only_fav: "Только избранное"
+        },
+        en: {
+          title: "MotorLab",
+          subtitle: "MotorLab — Electric Motor Design Tool",
+          tab_calc: "Calculator",
+          tab_help: "Help",
+          tab_history: "History",
+          theme_dark: "Dark theme",
+          theme_light: "Light theme",
+          auth_login: "Sign in",
+          auth_projects: "My projects",
+          install_app: "Install on phone/PC",
+          installed_app: "App installed",
+          update_app: "Update app",
+          example_btn: "Load Example",
+          start_tour: "Mini Tour",
+          tour_skip: "Skip",
+          tour_next: "Next",
+          tour_finish: "Finish",
+          clear: "Clear result",
+          help_quick: "How to Start in 30 Seconds",
+          help_q1: "1) Enter <strong>slot count</strong> and <strong>pole count</strong>.",
+          help_q2: "2) Press <strong>Calculate</strong> (on phone use the bottom button).",
+          help_q3: "3) Review winding view, winding factor, and <strong>Start/End A/B/C</strong> leads.",
+          help_q4: "4) For instant start press <strong>Load Example</strong>.",
+          help_params: "Parameters",
+          help_p1: "<strong>Slots</strong> — number of stator slots.",
+          help_p2: "<strong>Magnet poles</strong> — number of rotor magnet poles.",
+          help_p3: "<strong>D / Y</strong> — phase connection type: Delta / Star.",
+          help_p4: "<strong>1 layer / 2 layer (SPS)</strong> — single-layer or double-layer winding.",
+          help_p5: "<strong>Shortening</strong> — shortened pitch for distributed schemes.",
+          help_p6: "<strong>Schema mode</strong> — manual scheme entry with <code>A/B/C</code> and <code>a/b/c</code> letters instead of slot count.",
+          help_p7: "<strong>Rotor diameter at magnets</strong> — required to convert pole pitch to millimeters and estimate magnet arc width.",
+          help_p8: "<strong>Magnet mode (Smooth/Balanced/Torque)</strong> — sets the base pole-pitch coverage ratio.",
+          help_p9: "<strong>Air gap</strong> — used in practical V2 heuristic warnings (saturation/practicality checks).",
+          help_p10: "<strong>Magnet thickness</strong> — combined with air gap to flag overly aggressive geometry.",
+          help_p11: "<strong>Model limitation</strong> — this is an engineering arc-width recommendation, not a full electromagnetic rotor simulation.",
+          help_adv_title: "Advanced Winding Factor: How To Use",
+          help_adv_1: "1) Press <strong>Calculate</strong>, then open <strong>advanced</strong> under the winding factor line.",
+          help_adv_2: "2) In the <strong>slot factor</strong> block enter <strong>stator diameter</strong> and <strong>slot opening</strong>, enable the checkbox to include it into the table.",
+          help_adv_3: "3) In the <strong>skewed slots</strong> block enter skew value (in slots), enable the checkbox if skew must be included.",
+          help_adv_4: "4) Press <strong>Apply</strong> in the advanced block. Table recalculates: no checkboxes = base factor, one/two checkboxes = corrected factors.",
+          help_adv_5: "5) If a field blinks and resets to 0, the value is invalid (empty, 0, or not a number).",
+          help_adv_6: "6) In <strong>Magnet recommendation</strong>, enter rotor diameter at magnets and choose Smooth/Balanced/Torque mode.",
+          help_adv_7: "7) After main calculation you get: <strong>Pole pitch</strong>, <strong>Recommended coverage</strong>, <strong>Suggested width</strong>, and <strong>Useful range</strong>.",
+          help_adv_8: "8) Add <strong>Air gap</strong> and <strong>Magnet thickness</strong> to enable V2 warnings (cogging/saturation/back-iron margin).",
+          help_adv_9: "9) Keep the limitation in mind: final magnet choice must be validated against real motor geometry and KV/torque target.",
+          help_adv_card1: "<strong>Base:</strong> press Calculate to build the base scheme and base winding factor.",
+          help_adv_card2: "<strong>Slot factor:</strong> enter diameter/opening and enable checkbox to include it.",
+          help_adv_card3: "<strong>Skew:</strong> set skew in slots and enable checkbox if skew correction is needed.",
+          help_adv_card4: "<strong>Apply:</strong> press Apply and compare updated values in the factor table.",
+          help_table: "Typical Combinations Table (reference style)",
+          note_table: "Cell colors: blue — good, white — works, orange — works but worse, black — does not work.",
+          help_read: "How to read results",
+          help_phase_title: "What A/B/C and a/b/c mean",
+          help_phase_1: "<strong>A/B/C</strong> are the three phases. Colors: A red, B blue, C green.",
+          help_phase_2: "<strong>Uppercase</strong> (A/B/C) and <strong>lowercase</strong> (a/b/c) indicate opposite current directions in the active coil side.",
+          help_phase_3: "<strong>Example:</strong> sequence <code>A</code> then <code>a</code> is the same phase with reversed direction.",
+          help_r3: "<strong>Winding animation</strong> — step-by-step winding sequence.",
+          help_r4: "<strong>LCM</strong> — cogging steps per revolution.",
+          help_r5: "<strong>Winding factor</strong> — winding factor for selected scheme.",
+          help_r6: "<strong>Start / End A/B/C</strong> — start and end leads of each phase for wiring.",
+          help_r7: "<strong>-</strong> in scheme string means empty slot (no active coil side).",
+          help_rules: "Quick rules",
+          help_rule1: "Slots must be divisible by 3.",
+          help_rule2: "Poles must be even.",
+          help_rule3: "Slots and poles must not be equal.",
+          help_rule4: "Mostly orange/red combinations usually mean lower torque quality and more noise.",
+          help_examples: "Practical examples",
+          help_ex1: "<strong>9 slots / 12 poles</strong> is a practical starting point for small BLDC motors: usually a good balance of winding factor, manufacturability, and predictable startup.",
+          help_ex2: "<strong>D vs Y:</strong> <strong>D</strong> is often used for a more torque/current-oriented setup, while <strong>Y</strong> is often preferred for smoother startup and higher volts-per-rpm.",
+          help_ex3: "<strong>Fast filtering workflow:</strong> first reject schemes with poor phase balance and low winding factor, then compare remaining options by cogging (LCM/KgV) and winding practicality.",
+          help_checks: "Quick self-check",
+          help_c1: "1) Make sure phases A/B/C are distributed evenly around the stator.",
+          help_c2: "2) Verify upper/lower case count per phase is close to balanced.",
+          help_c3: "3) Compare alternatives by <strong>Winding factor</strong> and choose higher value with acceptable cogging.",
+          help_magnet_title: "Magnet Recommendation (Detailed)",
+          help_m1: "<strong>Base formula:</strong> pole pitch = π × rotor diameter at magnets / pole count.",
+          help_m2: "<strong>Suggested magnet width:</strong> pole pitch × coverage ratio.",
+          help_m3: "<strong>Coverage modes:</strong> Smooth = 70%, Balanced = 75%, Torque = 80% (with practical ranges).",
+          help_m4: "<strong>KgV correction:</strong> for harsher combinations the ratio is reduced slightly (never increased above base mode).",
+          help_m5: "<strong>Result shows:</strong> pole pitch, coverage %, suggested width, and practical width range in mm.",
+          help_m6: "<strong>V2 checks:</strong> high coverage, small air gap, thick magnet, low rotor/stator margin — heuristic early warnings.",
+          help_m7: "<strong>Important:</strong> this is not FEA and not a full rotor design; final choice must be validated against real geometry and KV/torque goal.",
+          help_data_title: "History, Export, Presets, and Share",
+          help_d1: "<strong>Save:</strong> stores current calculation (including magnet inputs and result) in browser history.",
+          help_d2: "<strong>Favorites:</strong> mark records with a star and use “Only favorites” filter in History tab.",
+          help_d3: "<strong>JSON/CSV export:</strong> exports current calculation. CSV includes magnet fields: mode, coverage, width, range.",
+          help_d4: "<strong>Share link:</strong> creates a link for the base calculation (slots/poles or scheme) for quick sharing.",
+          help_d5: "<strong>Presets:</strong> use built-in and custom presets for faster start.",
+          help_ui_title: "View Modes, Theme, and Install",
+          help_u1: "<strong>Visualization modes:</strong> “Winding”, “Electrical diagram”, and “Table” can be switched in the enhanced panel.",
+          help_u2: "<strong>Phase filter:</strong> highlight one phase (A/B/C) or display all phases.",
+          help_u3: "<strong>Extra overlays:</strong> toggle current direction markers and slot numbers.",
+          help_u4: "<strong>Theme:</strong> header switch toggles light/dark theme and stores preference locally.",
+          help_u5: "<strong>PWA:</strong> use “Install on phone/PC” to install as an app; base offline usage is available via service worker.",
+          history_search_ph: "Search history...",
+          history_only_fav: "Only favorites"
+        }
+      };
+      var updateStatusKey = "";
+      function getUpdateStatusText(key){
+        var ru = {
+          checking: "Проверка обновлений…",
+          available: "Доступно обновление",
+          applying: "Обновление применяется…",
+          up_to_date: "Версия актуальна",
+          error: "Не удалось проверить обновления"
+        };
+        var en = {
+          checking: "Checking updates…",
+          available: "Update available",
+          applying: "Applying update…",
+          up_to_date: "Up to date",
+          error: "Failed to check updates"
+        };
+        var table = (locale === "en") ? en : ru;
+        return table[key] || "";
+      }
+      function renderUpdateStatus(){
+        var statusNode = document.getElementById("updateStatus");
+        if (!statusNode) {
+          return;
+        }
+        if (!updateStatusKey) {
+          statusNode.hidden = true;
+          statusNode.textContent = "";
+          statusNode.className = "update_status";
+          return;
+        }
+        statusNode.hidden = false;
+        statusNode.textContent = getUpdateStatusText(updateStatusKey);
+        statusNode.className = "update_status is_" + updateStatusKey;
+      }
+      function setUpdateStatus(key){
+        updateStatusKey = key || "";
+        renderUpdateStatus();
+      }
+
+      function applyLocale(lang){
+        locale = lang;
+        var nodes = document.querySelectorAll("[data-i18n]");
+        for (var i = 0; i < nodes.length; i++) {
+          var key = nodes[i].getAttribute("data-i18n");
+          if (dict[lang] && dict[lang][key]) {
+            nodes[i].innerHTML = dict[lang][key];
+          }
+        }
+        var btn = document.getElementById("langToggle");
+        if (btn) {
+          btn.textContent = lang === "ru" ? "EN" : "RU";
+        }
+        var themeBtn = document.getElementById("themeToggle");
+        if (themeBtn && dict[lang]) {
+          themeBtn.textContent = "🌙";
+          themeBtn.setAttribute("title", currentTheme === "dark" ? dict[lang].theme_light : dict[lang].theme_dark);
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[lang].theme_light : dict[lang].theme_dark);
+        }
+        if (typeof setlang === "function") {
+          setlang(lang);
+        }
+        if (window.MotorProduct && window.MotorProduct.authUI && typeof window.MotorProduct.authUI.updateHeaderState === "function") {
+          window.MotorProduct.authUI.updateHeaderState();
+        }
+        var phNodes = document.querySelectorAll("[data-i18n-placeholder]");
+        for (var p = 0; p < phNodes.length; p++) {
+          var pkey = phNodes[p].getAttribute("data-i18n-placeholder");
+          if (dict[lang] && dict[lang][pkey]) {
+            phNodes[p].setAttribute("placeholder", dict[lang][pkey]);
+          }
+        }
+        if (installBtn && installBtn.disabled) {
+          installBtn.textContent = dict[lang].installed_app;
+        }
+        renderUpdateStatus();
+        if (!tourOverlay.hidden) {
+          setTourStep(currentTourStep);
+        }
+      }
+
+      var helpAccItems = document.querySelectorAll(".help_acc_item");
+      function syncHelpAccordion() {
+        var mobile = window.matchMedia("(max-width: 640px)").matches;
+        if (mobile) {
+          var hasOpen = false;
+          for (var i = 0; i < helpAccItems.length; i++) {
+            if (helpAccItems[i].open) {
+              hasOpen = true;
+              break;
+            }
+          }
+          if (!hasOpen && helpAccItems.length) {
+            helpAccItems[0].open = true;
+          }
+        } else {
+          for (var j = 0; j < helpAccItems.length; j++) {
+            helpAccItems[j].open = true;
+          }
+        }
+      }
+
+      for (var a = 0; a < helpAccItems.length; a++) {
+        helpAccItems[a].addEventListener("toggle", function () {
+          var mobile = window.matchMedia("(max-width: 640px)").matches;
+          if (!mobile || !this.open) {
+            return;
+          }
+          for (var i = 0; i < helpAccItems.length; i++) {
+            if (helpAccItems[i] !== this) {
+              helpAccItems[i].open = false;
+            }
+          }
+        });
+      }
+
+      function bindHelpTableInteractions() {
+        var table = document.querySelector(".ref_table");
+        if (!table) {
+          return;
+        }
+        function parseIntSafe(text){
+          var n = parseInt((text || "").toString().trim(), 10);
+          return isNaN(n) ? false : n;
+        }
+        function visualColumnIndex(row, targetCell){
+          if (!row || !targetCell) {
+            return -1;
+          }
+          var visual = 0;
+          var cells = row.cells || [];
+          for (var i = 0; i < cells.length; i++) {
+            var c = cells[i];
+            if (c === targetCell) {
+              return visual;
+            }
+            visual += (c.colSpan && c.colSpan > 0) ? c.colSpan : 1;
+          }
+          return -1;
+        }
+        function headerCellByVisualIndex(headerRow, visualIndex){
+          if (!headerRow || visualIndex < 0) {
+            return false;
+          }
+          var visual = 0;
+          var cells = headerRow.cells || [];
+          for (var i = 0; i < cells.length; i++) {
+            var c = cells[i];
+            var span = (c.colSpan && c.colSpan > 0) ? c.colSpan : 1;
+            if (visualIndex >= visual && visualIndex < (visual + span)) {
+              return c;
+            }
+            visual += span;
+          }
+          return false;
+        }
+        function applyTableScheme(cell){
+          if (!cell || !cell.parentNode || !table.tHead || !table.tHead.rows || !table.tHead.rows[0]) {
+            return false;
+          }
+          if (!(cell.classList.contains("ok2") || cell.classList.contains("ok1") || cell.classList.contains("warn"))) {
+            return false;
+          }
+          if (cell.classList.contains("bad") || cell.classList.contains("na")) {
+            return false;
+          }
+          var raw = (cell.textContent || "").trim().toLowerCase();
+          if (!raw || raw === "—" || raw === "-" || raw === "нет данных" || raw === "no data") {
+            return false;
+          }
+          var row = cell.parentNode;
+          var poleCell = row.querySelector("th");
+          var poles = parseIntSafe(poleCell ? poleCell.textContent : "");
+          var vIndex = visualColumnIndex(row, cell);
+          var slotHead = headerCellByVisualIndex(table.tHead.rows[0], vIndex);
+          var slots = parseIntSafe(slotHead ? slotHead.textContent : "");
+          if (!slots || !poles || !document.Windungsrechner) {
+            return false;
+          }
+          activateTab("tab_calc");
+          document.Windungsrechner.Nuten.value = String(slots);
+          document.Windungsrechner.Pole.value = String(poles);
+          if (typeof checkSPS === "function") {
+            checkSPS(slots, poles, true);
+          }
+          if (typeof checkVerteilt === "function") {
+            checkVerteilt();
+          }
+          if (typeof berechnen === "function") {
+            berechnen();
+          }
+          return true;
+        }
+        var cells = table.querySelectorAll("td");
+        for (var i = 0; i < cells.length; i++) {
+          if (cells[i].dataset.tapBound === "1") {
+            continue;
+          }
+          cells[i].dataset.tapBound = "1";
+          cells[i].addEventListener("click", function () {
+            if (!applyTableScheme(this)) {
+              return;
+            }
+            this.classList.add("is_tap");
+            var cell = this;
+            setTimeout(function () {
+              cell.classList.remove("is_tap");
+            }, 320);
+          });
+        }
+      }
+
+      window.addEventListener("resize", syncHelpAccordion);
+
+      var langToggle = document.getElementById("langToggle");
+      if (langToggle) {
+        langToggle.addEventListener("click", function () {
+          applyLocale(locale === "ru" ? "en" : "ru");
+        });
+      }
+      function applyTheme(theme){
+        currentTheme = (theme === "dark") ? "dark" : "light";
+        document.documentElement.classList.toggle("theme-dark", currentTheme === "dark");
+        try { localStorage.setItem("ui_theme", currentTheme); } catch (e) {}
+        if (dict[locale]) {
+          var themeBtn = document.getElementById("themeToggle");
+          if (themeBtn) {
+            themeBtn.textContent = "🌙";
+            themeBtn.setAttribute("title", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
+            themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
+          }
+        }
+      }
+      var themeToggle = document.getElementById("themeToggle");
+      if (themeToggle) {
+        themeToggle.addEventListener("click", function(){
+          applyTheme(currentTheme === "dark" ? "light" : "dark");
+        });
+      }
+
+      var installBtn = document.getElementById("installBtn");
+      var deferredInstallPrompt = null;
+
+      function setInstallButtonState(){
+        if (!installBtn) {
+          return;
+        }
+        if (installBtn.disabled) {
+          installBtn.hidden = false;
+          installBtn.textContent = dict[locale].installed_app;
+          return;
+        }
+        installBtn.hidden = !deferredInstallPrompt;
+      }
+
+      window.addEventListener("beforeinstallprompt", function(e){
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        setInstallButtonState();
+        if (window.MotorProduct && window.MotorProduct.analytics) {
+          window.MotorProduct.analytics.capture("upgrade_cta_viewed", { source: "install_prompt" });
+        }
+      });
+
+      window.addEventListener("appinstalled", function(){
+        deferredInstallPrompt = null;
+        if (window.MotorProduct && window.MotorProduct.analytics) {
+          window.MotorProduct.analytics.capture("pwa_installed", {});
+        }
+        if (installBtn) {
+          installBtn.hidden = false;
+          installBtn.textContent = (dict[locale] && dict[locale].installed_app) ? dict[locale].installed_app : "Installed";
+          installBtn.disabled = true;
+        }
+      });
+
+      if (installBtn) {
+        installBtn.addEventListener("click", async function(){
+          if (!deferredInstallPrompt) {
+            return;
+          }
+          deferredInstallPrompt.prompt();
+          try {
+            await deferredInstallPrompt.userChoice;
+          } catch (e) {}
+          deferredInstallPrompt = null;
+          setInstallButtonState();
+        });
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function(){
+          var updateBtn = document.getElementById("updateAppBtn");
+          var activeReg = null;
+          setUpdateStatus("checking");
+          function setUpdateButtonState(visible, enabled){
+            if (!updateBtn) {
+              return;
+            }
+            updateBtn.hidden = !visible;
+            updateBtn.disabled = !enabled;
+          }
+
+          function showUpdateButton(reg, enabled){
+            if (!reg) {
+              return;
+            }
+            activeReg = reg;
+            setUpdateButtonState(true, enabled !== false);
+          }
+
+          function hideUpdateButton(){
+            setUpdateButtonState(false, false);
+          }
+
+          function handleManualUpdate(){
+            if (!activeReg || !updateBtn || updateBtn.disabled) {
+              return;
+            }
+            if (activeReg.waiting) {
+              updateBtn.disabled = true;
+              setUpdateStatus("applying");
+              activeReg.waiting.postMessage({ type: "SKIP_WAITING" });
+              return;
+            }
+            if (activeReg.update) {
+              updateBtn.disabled = true;
+              setUpdateStatus("checking");
+              activeReg.update();
+              setTimeout(function(){
+                if (updateBtn) {
+                  updateBtn.disabled = false;
+                }
+                setUpdateStatus("up_to_date");
+              }, 1200);
+            }
+          }
+
+          if (updateBtn) {
+            hideUpdateButton();
+            updateBtn.addEventListener("click", handleManualUpdate);
+          }
+
+          navigator.serviceWorker.register("./sw.js?v=5").then(function(reg){
+            activeReg = reg;
+            if (reg && reg.update) { reg.update(); }
+            if (reg && reg.waiting) {
+              showUpdateButton(reg, true);
+              setUpdateStatus("available");
+            } else if (updateBtn) {
+              setUpdateButtonState(true, true);
+              setUpdateStatus("up_to_date");
+            }
+            if (reg) {
+              reg.addEventListener("updatefound", function(){
+                var installing = reg.installing;
+                if (!installing) {
+                  return;
+                }
+                setUpdateStatus("checking");
+                installing.addEventListener("statechange", function(){
+                  if (installing.state === "installed" && navigator.serviceWorker.controller) {
+                    showUpdateButton(reg, true);
+                    setUpdateStatus("available");
+                  } else if (installing.state === "activated") {
+                    setUpdateStatus("up_to_date");
+                  }
+                });
+              });
+            }
+          }).catch(function(){
+            setUpdateStatus("error");
+            if (updateBtn) {
+              setUpdateButtonState(true, true);
+            }
+          });
+
+          navigator.serviceWorker.addEventListener("controllerchange", function(){
+            if (updateBtn) {
+              updateBtn.disabled = true;
+            }
+            setUpdateStatus("applying");
+            window.location.reload();
+          });
+        });
+      }
+
+      function applyQuickExample(){
+        activateTab("tab_calc");
+        if (!document.Windungsrechner) {
+          return;
+        }
+        document.Windungsrechner.Nuten.value = "9";
+        document.Windungsrechner.Pole.value = "12";
+        if (typeof checkSPS === "function") {
+          checkSPS("9", "12", true);
+        }
+        if (typeof checkVerteilt === "function") {
+          checkVerteilt();
+        }
+        var calcBtn = document.getElementById("Berechnen");
+        if (calcBtn) {
+          calcBtn.click();
+        }
+      }
+
+      var quickExampleBtn = document.getElementById("quickExampleBtn");
+      var helpExampleBtn = document.getElementById("helpExampleBtn");
+      var upgradeBtn = document.getElementById("upgradeBtn");
+      if (quickExampleBtn) {
+        quickExampleBtn.addEventListener("click", applyQuickExample);
+      }
+      if (helpExampleBtn) {
+        helpExampleBtn.addEventListener("click", applyQuickExample);
+      }
+      if (upgradeBtn) {
+        upgradeBtn.addEventListener("click", function(){
+          if (window.MotorProduct && window.MotorProduct.paywall) {
+            window.MotorProduct.paywall.open("upgrade", "header_upgrade_button", {});
+          }
+        });
+      }
+      var historySearch = document.getElementById("history_search");
+      var historyFavOnly = document.getElementById("history_fav_only");
+      if (historySearch) {
+        historySearch.addEventListener("input", function(){
+          if (typeof refreshHistoryTab === "function") {
+            refreshHistoryTab();
+          }
+        });
+      }
+      if (historyFavOnly) {
+        historyFavOnly.addEventListener("change", function(){
+          if (typeof refreshHistoryTab === "function") {
+            refreshHistoryTab();
+          }
+        });
+      }
+
+      var TOUR_KEY = "winding_tour_seen_v1";
+      var tourOverlay = document.getElementById("tourOverlay");
+      var tourTitle = document.getElementById("tourTitle");
+      var tourText = document.getElementById("tourText");
+      var tourStep = document.getElementById("tourStep");
+      var tourNextBtn = document.getElementById("tourNextBtn");
+      var tourSkipBtn = document.getElementById("tourSkipBtn");
+      var helpTourBtn = document.getElementById("helpTourBtn");
+      var currentTourStep = 0;
+
+      function getTourSteps(lang){
+        if (lang === "en") {
+          return [
+            { tab: "tab_calc", selector: "#jsContainer form", title: "Step 1: Enter Base Data", text: "Set slots and poles. You can start with 9 / 12 for a known working case." },
+            { tab: "tab_calc", selector: "#Berechnen, #mobileCalcBtn", title: "Step 2: Calculate", text: "Press Calculate and wait for winding pattern, winding factor, and phase leads." },
+            { tab: "tab_help", selector: "#tab_help", title: "Step 3: Read and Tune", text: "Open Help for A/B/C and a/b/c meaning and advanced winding factor usage." }
+          ];
+        }
+        return [
+          { tab: "tab_calc", selector: "#jsContainer form", title: "Шаг 1: Введите базовые данные", text: "Задайте число пазов и полюсов. Для старта можно использовать 9 / 12." },
+          { tab: "tab_calc", selector: "#Berechnen, #mobileCalcBtn", title: "Шаг 2: Выполните расчет", text: "Нажмите «Рассчитать» и получите схему намотки, коэффициент и выводы фаз." },
+          { tab: "tab_help", selector: "#tab_help", title: "Шаг 3: Проверьте и настройте", text: "Откройте справку: там объяснение A/B/C и a/b/c, а также работа расширенного коэффициента." }
+        ];
+      }
+
+      function clearTourFocus(){
+        var focused = document.querySelectorAll(".tour_target");
+        for (var i = 0; i < focused.length; i++) {
+          focused[i].classList.remove("tour_target");
+        }
+      }
+
+      function setTourStep(stepIndex){
+        var steps = getTourSteps(locale);
+        if (!steps.length) {
+          return;
+        }
+        if (stepIndex < 0) {
+          stepIndex = 0;
+        }
+        if (stepIndex >= steps.length) {
+          stepIndex = steps.length - 1;
+        }
+        currentTourStep = stepIndex;
+        var stepData = steps[stepIndex];
+        if (stepData.tab) {
+          activateTab(stepData.tab);
+        }
+        clearTourFocus();
+        if (stepData.selector) {
+          var target = document.querySelector(stepData.selector);
+          if (target) {
+            target.classList.add("tour_target");
+            if (typeof target.scrollIntoView === "function") {
+              target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
+        }
+        tourTitle.textContent = stepData.title;
+        tourText.textContent = stepData.text;
+        tourStep.textContent = (stepIndex + 1) + " / " + steps.length;
+        if (tourNextBtn) {
+          tourNextBtn.textContent = (stepIndex === steps.length - 1)
+            ? dict[locale].tour_finish
+            : dict[locale].tour_next;
+        }
+      }
+
+      function closeTour(markSeen){
+        clearTourFocus();
+        tourOverlay.hidden = true;
+        document.body.classList.remove("tour_open");
+        if (window.MotorProduct && window.MotorProduct.analytics) {
+          window.MotorProduct.analytics.capture("onboarding_completed", { source: "mini_tour" });
+        }
+        if (markSeen) {
+          try {
+            localStorage.setItem(TOUR_KEY, "1");
+          } catch (e) {}
+        }
+      }
+
+      function openTour(force){
+        if (!tourOverlay) {
+          return;
+        }
+        if (!force) {
+          try {
+            if (localStorage.getItem(TOUR_KEY) === "1") {
+              return;
+            }
+          } catch (e) {}
+        }
+        tourOverlay.hidden = false;
+        document.body.classList.add("tour_open");
+        setTourStep(0);
+        if (window.MotorProduct && window.MotorProduct.analytics) {
+          window.MotorProduct.analytics.capture("onboarding_started", { source: force ? "manual_tour" : "auto_tour" });
+        }
+      }
+      window.motorOpenMiniTour = function(){
+        openTour(true);
+      };
+
+      if (helpTourBtn) {
+        helpTourBtn.addEventListener("click", function(){
+          openTour(true);
+        });
+      }
+      if (tourSkipBtn) {
+        tourSkipBtn.addEventListener("click", function(){
+          closeTour(true);
+        });
+      }
+      if (tourNextBtn) {
+        tourNextBtn.addEventListener("click", function(){
+          var steps = getTourSteps(locale);
+          if (currentTourStep >= steps.length - 1) {
+            closeTour(true);
+          } else {
+            setTourStep(currentTourStep + 1);
+          }
+        });
+      }
+      if (tourOverlay) {
+        tourOverlay.addEventListener("click", function(e){
+          if (e.target === tourOverlay) {
+            closeTour(true);
+          }
+        });
+      }
+
+      initMobilePlatformTweaks();
+      if (window.MotorProduct && window.MotorProduct.analytics) {
+        window.MotorProduct.analytics.init({ buildVersion: "1.0.1" });
+        if (window.MotorProduct.pro && window.MotorProduct.pro.getAccessState) {
+          var st = window.MotorProduct.pro.getAccessState();
+          window.MotorProduct.analytics.capture("subscription_status_checked", {
+            plan_name: st && st.plan ? st.plan : "free",
+            status: st && st.status ? st.status : "inactive"
+          });
+        }
+      }
+      if (window.MotorProduct && window.MotorProduct.billing) {
+        try {
+          var searchParams = new URLSearchParams(window.location.search || "");
+          var checkoutStatus = searchParams.get("checkout");
+          if (checkoutStatus === "success" || checkoutStatus === "cancel") {
+            window.MotorProduct.billing.handleCheckoutReturn(checkoutStatus === "success" ? "success" : "cancelled", "checkout_return");
+          }
+        } catch (e) {}
+      }
+      applyLocale("ru");
+      if (window.MotorProduct && window.MotorProduct.auth) {
+        window.MotorProduct.auth.init().then(function(){
+          if (window.MotorProduct.authUI) {
+            window.MotorProduct.authUI.init();
+          }
+          var st = window.MotorProduct.auth.getState ? window.MotorProduct.auth.getState() : null;
+          if (st && st.isAuthenticated && window.MotorProduct.userData) {
+            window.MotorProduct.userData.loadCloudToLocal().finally(function(){
+              if (typeof renderCalcActions === "function") { renderCalcActions(); }
+              if (typeof refreshHistoryTab === "function") { refreshHistoryTab(); }
+              if (window.MotorProduct.uiBadges) { window.MotorProduct.uiBadges.refresh(); }
+            });
+          }
+          if (window.MotorProduct.auth && typeof window.MotorProduct.auth.onAuthStateChange === "function") {
+            window.MotorProduct.auth.onAuthStateChange(function(_event, authState){
+              if (!authState || !authState.isAuthenticated || !window.MotorProduct.userData) {
+                return;
+              }
+              window.MotorProduct.userData.loadCloudToLocal().finally(function(){
+                if (typeof renderCalcActions === "function") { renderCalcActions(); }
+                if (typeof refreshHistoryTab === "function") { refreshHistoryTab(); }
+              });
+            });
+          }
+        });
+      } else if (window.MotorProduct && window.MotorProduct.authUI) {
+        window.MotorProduct.authUI.init();
+      }
+      setInstallButtonState();
+      syncHelpAccordion();
+      bindHelpTableInteractions();
+      if (window.MotorProduct && window.MotorProduct.onboarding) {
+        window.MotorProduct.onboarding.init();
+      }
+      if (window.MotorProduct && window.MotorProduct.uiBadges) {
+        window.MotorProduct.uiBadges.refresh();
+      }
+      if (typeof refreshHistoryTab === "function") {
+        refreshHistoryTab();
+      }
+      setTimeout(function(){ openTour(false); }, 500);
+    })();
+  </script>
+</body>
+</html>
