@@ -1473,6 +1473,10 @@
               if (!authState || !authState.isAuthenticated || !window.MotorProduct.userData) {
                 return;
               }
+              if (window.MotorProduct.__skipNextAuthAutoLoad) {
+                window.MotorProduct.__skipNextAuthAutoLoad = false;
+                return;
+              }
               window.MotorProduct.userData.loadCloudToLocal().finally(function(){
                 if (typeof renderCalcActions === "function") { renderCalcActions(); }
                 if (typeof refreshHistoryTab === "function") { refreshHistoryTab(); }

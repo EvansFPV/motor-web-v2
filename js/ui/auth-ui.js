@@ -51,9 +51,11 @@
       var preSignInLocal = (root.userData && typeof root.userData.readLocalProjects === 'function')
         ? (root.userData.readLocalProjects() || []).slice(0)
         : getLocalProjectsFallback().slice(0);
+      root.__skipNextAuthAutoLoad = true;
       setStatus(t('Вход...', 'Signing in...'));
       root.auth.signIn(email, pass).then(function(res){
         if(!res.ok){
+          root.__skipNextAuthAutoLoad = false;
           setStatus(res.message || t('Не удалось войти', 'Sign in failed'));
           return;
         }
@@ -96,7 +98,7 @@
           setStatus(res.message || t('Не удалось зарегистрироваться', 'Sign up failed'));
           return;
         }
-        setStatus(t('Аккаунт создан. Проверьте email для подтверждения, если включено.', 'Account created. Check your email if confirmation is enabled.'));
+        setStatus(res.message || t('Аккаунт создан. Проверьте email для подтверждения, если включено.', 'Account created. Check your email if confirmation is enabled.'));
         if(analytics() && analytics().capture){
           analytics().capture('signup_success', {method:'email_password'});
         }

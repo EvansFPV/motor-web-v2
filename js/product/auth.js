@@ -6,7 +6,8 @@
     isAuthenticated: false,
     userPlan: 'free',
     profile: null,
-    loading: false
+    loading: false,
+    authReady: false
   };
   var listeners = [];
 
@@ -22,7 +23,9 @@
       isAuthenticated: state.isAuthenticated,
       userPlan: state.userPlan || 'free',
       profile: state.profile,
-      loading: state.loading
+      currentProfile: state.profile,
+      loading: state.loading,
+      authReady: !!state.authReady
     };
   }
 
@@ -61,6 +64,10 @@
       });
   }
 
+  function sessionUserFromResult(res){
+    return (res && res.data && res.data.session && res.data.session.user) ? res.data.session.user : null;
+  }
+
   function signUp(email, password){
     var sb = root.supabase && root.supabase.getClient ? root.supabase.getClient() : null;
     if(!sb){
@@ -74,7 +81,16 @@
       if(res.error){
         return {ok:false, message:res.error.message || 'Ошибка регистрации'};
       }
-      applyUser(res.data && res.data.user ? res.data.user : null);
+      var sessionUser = sessionUserFromResult(res);
+      applyUser(sessionUser || null);
+      if(!sessionUser){
+        return {
+          ok:true,
+          pendingVerification:true,
+          data:res.data,
+          message:'Аккаунт создан. Подтвердите email для входа.'
+        };
+      }
       return readProfile().then(function(){
         return {ok:true, data:res.data};
       });
@@ -98,7 +114,12 @@
       if(res.error){
         return {ok:false, message:res.error.message || 'Ошибка входа'};
       }
-      applyUser(res.data && res.data.user ? res.data.user : null);
+      var sessionUser = sessionUserFromResult(res);
+      if(!sessionUser){
+        applyUser(null);
+        return {ok:false, message:'Сессия не создана. Проверьте подтверждение email и настройки входа.'};
+      }
+      applyUser(sessionUser);
       return readProfile().then(function(){
         return {ok:true, data:res.data};
       });
@@ -161,6 +182,7 @@
     var sb = root.supabase && root.supabase.getClient ? root.supabase.getClient() : null;
     if(!sb){
       applyUser(null);
+      state.authReady = true;
       notify('ready_no_client');
       return Promise.resolve({ok:false, reason:'no_client'});
     }
@@ -168,12 +190,16 @@
       var user = res && res.data && res.data.session ? res.data.session.user : null;
       applyUser(user || null);
       return readProfile().then(function(){
+        state.authReady = true;
         notify('session_restored');
+        notify('auth_ready');
         return {ok:true, user:user || null};
       });
     }).catch(function(){
       applyUser(null);
+      state.authReady = true;
       notify('session_restore_failed');
+      notify('auth_ready');
       return {ok:false, reason:'session_failed'};
     });
   }
@@ -182,7 +208,9 @@
     var sb = root.supabase && root.supabase.initClient ? root.supabase.initClient() : null;
     if(!sb){
       applyUser(null);
+      state.authReady = true;
       notify('ready_no_client');
+      notify('auth_ready');
       return Promise.resolve({ok:false, reason:'no_client'});
     }
 
@@ -190,6 +218,8 @@
       sb.auth.onAuthStateChange(function(_event, session){
         var user = session && session.user ? session.user : null;
         applyUser(user || null);
+        state.authReady = true;
+        notify('auth_ready');
         readProfile();
       });
       return result;
@@ -208,6 +238,7 @@
     getUserPlan: getUserPlan,
     isProUser: isProUser,
     readProfile: readProfile,
+    getCurrentProfile: function(){ return state.profile; },
     restoreSession: restoreSession,
     onAuthStateChange: onAuthStateChange
   };
