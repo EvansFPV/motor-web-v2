@@ -93,6 +93,59 @@ body{
   overscroll-behavior-y:none;
 }
 
+#app-splash{
+  position:fixed;
+  inset:0;
+  z-index:520;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#0B1220;
+  opacity:1;
+  visibility:visible;
+  transition:opacity .32s ease, visibility .32s ease;
+}
+
+#app-splash.is_hidden{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+#app-splash .splash-inner{
+  text-align:center;
+  color:#E5E7EB;
+  padding:24px;
+}
+
+#app-splash .splash-logo{
+  width:92px;
+  height:92px;
+  border-radius:20px;
+  display:block;
+  margin:0 auto 16px;
+  box-shadow:0 10px 26px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.10);
+}
+
+#app-splash .splash-title{
+  font-size:24px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:.2px;
+}
+
+#app-splash .splash-subtitle{
+  margin-top:8px;
+  font-size:13px;
+  color:#9CA3AF;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #app-splash{
+    transition:none;
+  }
+}
+
 button,
 input,
 select,

@@ -34,6 +34,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <div id="app-splash" aria-hidden="true">
+    <div class="splash-inner">
+      <img src="/icons/apple-touch-icon.png" alt="MotorLab icon" class="splash-logo" />
+      <div class="splash-title">MotorLab</div>
+      <div class="splash-subtitle">Electric Motor Design Tool</div>
+    </div>
+  </div>
   <main class="app">
     <header class="app_header">
       <div class="header_row">
@@ -368,6 +375,32 @@
   <script src="./bewicklungsrechner_xl_script.js"></script>
   <script>
     (function () {
+      var splashHidden = false;
+      function hideAppSplash(){
+        if (splashHidden) {
+          return;
+        }
+        var splash = document.getElementById("app-splash");
+        if (!splash) {
+          splashHidden = true;
+          return;
+        }
+        splashHidden = true;
+        splash.classList.add("is_hidden");
+        setTimeout(function(){
+          if (splash && splash.parentNode) {
+            splash.parentNode.removeChild(splash);
+          }
+        }, 420);
+      }
+      window.addEventListener("load", function(){
+        setTimeout(hideAppSplash, 320);
+      }, { once: true });
+      setTimeout(hideAppSplash, 7000);
+      if (document.readyState === "complete") {
+        setTimeout(hideAppSplash, 320);
+      }
+
       var tabButtons = document.querySelectorAll(".tab_btn");
       var tabPanels = document.querySelectorAll(".tab_panel");
       var helpAccordion = document.querySelector(".help_accordion");
