@@ -1,7 +1,7 @@
 # License Choice
 
-This project does not yet include a final license text.
-Choose one of the options below before public release.
+This repository does not yet include a final `LICENSE` file.
+Choose one of the options below before creating the first formal public release.
 
 ## Option 1: MIT
 - Very permissive
@@ -16,4 +16,9 @@ Choose one of the options below before public release.
 ## Recommended Next Step
 1. Pick MIT or Apache-2.0.
 2. Add a `LICENSE` file with the full official text.
-3. Update `README.md` License section.
+3. Keep `README.md` License section consistent with the selected license.
+4. Verify the repository license badge/status on GitHub after pushing.
+
+## Important
+- Do not publish a custom or partial license text.
+- Use the official, unmodified SPDX-compatible license text.
