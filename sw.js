@@ -1,15 +1,16 @@
-const CACHE_NAME = "motorlab-v7";
+const CACHE_NAME = "motorlab-v8";
 const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./bewicklungsrechner_xl_style.css",
-  "./bewicklungsrechner_xl_script.js",
-  "./manifest.json",
-  "./icons/favicon-32.png",
-  "./icons/apple-touch-icon.png",
-  "./icons/icon-180.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "/",
+  "/index.html",
+  "/bewicklungsrechner_xl_style.css",
+  "/bewicklungsrechner_xl_script.js",
+  "/manifest.json",
+  "/icons/favicon-16.png",
+  "/icons/favicon-32.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/icon-180.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -44,10 +45,10 @@ self.addEventListener("fetch", (event) => {
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put("/index.html", copy));
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(() => caches.match("/index.html"))
     );
     return;
   }
@@ -67,7 +68,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
           return response;
         })
-        .catch(() => caches.match("./index.html"));
+        .catch(() => caches.match("/index.html"));
     })
   );
 });
