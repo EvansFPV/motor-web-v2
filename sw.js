@@ -1,10 +1,13 @@
-const CACHE_NAME = "motorlab-v8";
+const CACHE_NAME = "motorlab-v9";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/bewicklungsrechner_xl_style.css",
   "/bewicklungsrechner_xl_script.js",
   "/manifest.json",
+  "/apple-touch-icon.png",
+  "/favicon-16.png",
+  "/favicon-32.png",
   "/icons/favicon-16.png",
   "/icons/favicon-32.png",
   "/icons/apple-touch-icon.png",

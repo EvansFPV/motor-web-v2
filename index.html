@@ -8,8 +8,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MotorLab" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.json" />
   <script>
@@ -1285,6 +1286,7 @@
         window.addEventListener("load", function(){
           var updateBtn = document.getElementById("updateAppBtn");
           var activeReg = null;
+          var pendingUserApply = false;
           setUpdateStatus("checking");
           function setUpdateButtonState(visible, enabled){
             if (!updateBtn) {
@@ -1306,27 +1308,99 @@
             setUpdateButtonState(false, false);
           }
 
-          function handleManualUpdate(){
-            if (!activeReg || !updateBtn || updateBtn.disabled) {
+          function bindInstallingWorker(reg, installing){
+            if (!reg || !installing) {
               return;
             }
-            if (activeReg.waiting) {
+            installing.addEventListener("statechange", function(){
+              if (installing.state === "installed" && navigator.serviceWorker.controller) {
+                setUpdateStatus("available");
+                showUpdateButton(reg, true);
+                if (pendingUserApply && reg.waiting) {
+                  setUpdateStatus("applying");
+                  reg.waiting.postMessage({ type: "SKIP_WAITING" });
+                } else if (pendingUserApply && updateBtn) {
+                  updateBtn.disabled = false;
+                }
+              } else if (installing.state === "activated") {
+                pendingUserApply = false;
+                setUpdateStatus("up_to_date");
+                if (updateBtn) {
+                  updateBtn.disabled = false;
+                }
+              } else if (installing.state === "redundant") {
+                pendingUserApply = false;
+                setUpdateStatus("error");
+                if (updateBtn) {
+                  updateBtn.disabled = false;
+                }
+              }
+            });
+          }
+
+          function syncRegistrationState(reg){
+            if (!reg) {
+              return;
+            }
+            activeReg = reg;
+            if (reg.waiting) {
+              showUpdateButton(reg, true);
+              setUpdateStatus("available");
+              if (pendingUserApply) {
+                setUpdateStatus("applying");
+                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+              }
+              return;
+            }
+            if (reg.installing) {
+              setUpdateStatus("checking");
+              showUpdateButton(reg, false);
+              bindInstallingWorker(reg, reg.installing);
+              return;
+            }
+            setUpdateButtonState(true, true);
+            setUpdateStatus("up_to_date");
+          }
+
+          function requestUpdateAndMaybeApply(){
+            if (!activeReg) {
+              return;
+            }
+            pendingUserApply = true;
+            if (updateBtn) {
               updateBtn.disabled = true;
+            }
+            setUpdateStatus("checking");
+            if (activeReg.waiting) {
               setUpdateStatus("applying");
               activeReg.waiting.postMessage({ type: "SKIP_WAITING" });
               return;
             }
-            if (activeReg.update) {
-              updateBtn.disabled = true;
-              setUpdateStatus("checking");
-              activeReg.update();
-              setTimeout(function(){
-                if (updateBtn) {
-                  updateBtn.disabled = false;
-                }
+            var updatePromise = (activeReg.update && typeof activeReg.update === "function")
+              ? activeReg.update()
+              : Promise.resolve();
+            updatePromise.then(function(){
+              syncRegistrationState(activeReg);
+              // No new SW found, return control to user.
+              if (!activeReg.waiting && !activeReg.installing && updateBtn) {
+                pendingUserApply = false;
+                updateBtn.disabled = false;
                 setUpdateStatus("up_to_date");
-              }, 1200);
+              }
+            }).catch(function(){
+              pendingUserApply = false;
+              setUpdateStatus("error");
+              if (updateBtn) {
+                updateBtn.disabled = false;
+              }
+            });
+          }
+
+          function handleManualUpdate(){
+            if (!activeReg || !updateBtn || updateBtn.disabled) {
+              return;
             }
+            requestUpdateAndMaybeApply();
           }
 
           if (updateBtn) {
@@ -1334,16 +1408,10 @@
             updateBtn.addEventListener("click", handleManualUpdate);
           }
 
-          navigator.serviceWorker.register("./sw.js?v=5").then(function(reg){
+          navigator.serviceWorker.register("/sw.js?v=9").then(function(reg){
             activeReg = reg;
-            if (reg && reg.update) { reg.update(); }
-            if (reg && reg.waiting) {
-              showUpdateButton(reg, true);
-              setUpdateStatus("available");
-            } else if (updateBtn) {
-              setUpdateButtonState(true, true);
-              setUpdateStatus("up_to_date");
-            }
+            syncRegistrationState(reg);
+            if (reg && reg.update) { reg.update().then(function(){ syncRegistrationState(reg); }); }
             if (reg) {
               reg.addEventListener("updatefound", function(){
                 var installing = reg.installing;
@@ -1351,14 +1419,8 @@
                   return;
                 }
                 setUpdateStatus("checking");
-                installing.addEventListener("statechange", function(){
-                  if (installing.state === "installed" && navigator.serviceWorker.controller) {
-                    showUpdateButton(reg, true);
-                    setUpdateStatus("available");
-                  } else if (installing.state === "activated") {
-                    setUpdateStatus("up_to_date");
-                  }
-                });
+                showUpdateButton(reg, false);
+                bindInstallingWorker(reg, installing);
               });
             }
           }).catch(function(){
@@ -1366,6 +1428,10 @@
             if (updateBtn) {
               setUpdateButtonState(true, true);
             }
+          });
+
+          navigator.serviceWorker.ready.then(function(reg){
+            syncRegistrationState(reg);
           });
 
           navigator.serviceWorker.addEventListener("controllerchange", function(){

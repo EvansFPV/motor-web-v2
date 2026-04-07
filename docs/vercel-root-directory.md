@@ -8,7 +8,9 @@ If iPhone **Add to Home Screen** shows a blank/dark icon, the most common cause 
 
 ## Required Vercel setting
 1. Open **Vercel → Project → Settings → General**.
-2. Set **Root Directory** to your app folder (example: `motor web v2`).
+2. Set **Root Directory** based on your repo layout:
+   - `index.html` is in repo root → Root Directory should be empty (or `.`).
+   - app is in subfolder (example: `motor web v2`) → set Root Directory to that folder.
 3. Redeploy.
 
 ## Why this works
@@ -45,7 +47,9 @@ Then on iPhone:
 
 ## Что поставить в Vercel
 1. Откройте **Vercel → Project → Settings → General**.
-2. Установите **Root Directory** на папку приложения (пример: `motor web v2`).
+2. Установите **Root Directory** по структуре репозитория:
+   - если `index.html` лежит в корне — Root Directory должен быть пустым (или `.`);
+   - если приложение лежит в подпапке (пример: `motor web v2`) — укажите эту подпапку.
 3. Сделайте redeploy.
 
 ## Проверка

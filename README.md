@@ -34,7 +34,9 @@ MotorLab is a static web application. You can deploy it on Vercel, Netlify, GitH
 
 ### Vercel
 - `vercel.json` is included for rewrites and cache headers.
-- If your repository contains this app in a subfolder (for example `motor web v2/`), set **Project Settings → Root Directory** to that subfolder.
+- Set **Project Settings → Root Directory** according to your repository layout:
+  - If `index.html` is in repository root: keep Root Directory empty (or `.`).
+  - If app is inside a subfolder: set Root Directory to that subfolder.
 - Keep app paths root-relative (`/icons/...`, `/manifest.json`) and ensure Vercel serves the app from the selected root.
 - After changing root directory, redeploy once and verify:
   - `/icons/apple-touch-icon.png`
@@ -136,7 +138,9 @@ python3 -m http.server 8080
 
 ### Деплой
 - Vercel/Netlify/GitHub Pages/Nginx — как статический сайт.
-- Для Vercel при структуре с подпапкой укажите **Root Directory = `motor web v2`**.
+- Для Vercel:
+  - если `index.html` в корне репозитория — Root Directory оставить пустым (или `.`);
+  - если приложение в подпапке — указать эту подпапку как Root Directory.
 - После изменения иконок/manifest обновите PWA-кэш один раз.
 
 ### Supabase (опционально)
