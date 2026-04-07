@@ -4,7 +4,7 @@
 MotorLab is a browser-based electric motor winding and magnet design tool for fast BLDC scheme exploration, engineering checks, and mobile-friendly workflows.
 
 ## Status
-Current public baseline: `1.0.3` (production-candidate quality with stable calculator, PWA shell, and optional Supabase hooks).
+Current public beta: `1.1.0-beta` (stabilization + UX polish + release-prep pass with preserved core calculation logic).
 
 ## Core Features
 - Winding scheme calculator (slots/poles and manual schema modes)
@@ -105,6 +105,7 @@ tests/
 ## Releases
 - Changelog: [`CHANGELOG.md`](./CHANGELOG.md)
 - GitHub metadata and first-release draft: [`docs/github-metadata.md`](./docs/github-metadata.md)
+- Beta release draft for GitHub: [`docs/release-1.1.0-beta.md`](./docs/release-1.1.0-beta.md)
 - Use semantic versioning for user-visible and deployment-relevant changes.
 
 ## License
@@ -116,7 +117,7 @@ See [`LICENSE-CHOICE.md`](./LICENSE-CHOICE.md).
 MotorLab — это веб-инструмент для расчета схем обмотки и подбора магнитов BLDC, с инженерными проверками, визуализацией и мобильным UX.
 
 ### Статус
-Текущая публичная база: `1.0.3` (production-candidate: стабильный калькулятор, PWA-оболочка, опциональные Supabase-хуки).
+Текущая публичная beta-версия: `1.1.0-beta` (стабилизация + UX-полировка + подготовка к публичному релизу, с сохранением ядра расчётов).
 
 ### Ключевые возможности
 - Калькулятор обмоток (пазы/полюса и режим ручной схемы)

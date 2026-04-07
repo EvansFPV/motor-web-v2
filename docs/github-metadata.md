@@ -21,19 +21,19 @@ MotorLab is a browser-based BLDC winding and magnet design tool with visualizati
 - `engineering-tools`
 - `offline-first`
 
-## First Release Recommendation
+## Current Beta Release Recommendation
 
 ### Title
-`v1.0.3 - Public Baseline Release`
+`v1.1.0-beta - Public Beta`
 
 ### Tag
-`v1.0.3`
+`v1.1.0-beta`
 
 ### Release Notes Draft
 ```markdown
-## MotorLab v1.0.3
+## MotorLab v1.1.0-beta
 
-First public baseline release of MotorLab.
+Public beta release of MotorLab focused on stability, UX polish, and release-readiness.
 
 ### Highlights
 - Stable winding scheme calculator (slots/poles + schema mode)
@@ -43,19 +43,22 @@ First public baseline release of MotorLab.
 - Mobile-friendly PWA behavior with install/offline shell support
 - Optional Supabase auth/cloud project hooks while preserving guest mode
 
-### Repository and Release Readiness
-- Public repo hygiene baseline (CI, docs, changelog, deployment configs)
-- Supabase schema and optional integration modules included
+### In This Beta
+- Dark-theme readability and UI consistency improvements
+- Advanced controls visual polish and card-layout stabilization
+- Improved table-to-calculation scheme handling with safer fallback behavior
+- Release metadata/docs aligned for public GitHub publication
 
 ### Notes
 - Core calculation logic is intentionally preserved.
 - Supabase setup is optional; guest mode works without backend.
+- This is a beta release intended for community testing and fast iteration.
 ```
 
 ## Release Checklist
 1. Confirm selected open-source license and commit root `LICENSE` file.
 2. Confirm README reflects current production/demo URL state.
-3. Create tag `v1.0.3` from the intended release commit.
+3. Create tag `v1.1.0-beta` from the intended release commit.
 4. Publish GitHub Release using the notes draft above.
 
 ---
@@ -86,5 +89,5 @@ MotorLab — веб-инструмент для проектирования BLD
 ## Чеклист релиза
 1. Выбрать финальную лицензию и добавить файл `LICENSE`.
 2. Проверить актуальность README (URL, статус, инструкции).
-3. Создать tag релиза (например, `v1.0.3`).
+3. Создать tag релиза (например, `v1.1.0-beta`).
 4. Опубликовать GitHub Release с заметками изменений.

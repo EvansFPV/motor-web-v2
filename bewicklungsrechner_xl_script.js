@@ -625,6 +625,44 @@ lang['history_warn_has_de'] = 'V2: Warnungen vorhanden';
 lang['history_warn_na_ru'] = 'V2: нет данных';
 lang['history_warn_na_en'] = 'V2: no data';
 lang['history_warn_na_de'] = 'V2: keine Daten';
+lang['calc_setup_ru'] = 'Конфигурация двигателя';
+lang['calc_setup_en'] = 'Motor setup';
+lang['calc_actions_title_ru'] = 'Действия и данные';
+lang['calc_actions_title_en'] = 'Actions and data';
+lang['calc_advanced_title_ru'] = 'Расширенные параметры';
+lang['calc_advanced_title_en'] = 'Advanced options';
+lang['calc_overview_title_ru'] = 'Обзор результата';
+lang['calc_overview_title_en'] = 'Result overview';
+lang['calc_winding_title_ru'] = 'Оценка обмотки';
+lang['calc_winding_title_en'] = 'Winding assessment';
+lang['calc_magnet_title_ru'] = 'Рекомендация по магниту';
+lang['calc_magnet_title_en'] = 'Magnet advisor';
+lang['view_controls_ru'] = 'Панель отображения';
+lang['view_controls_en'] = 'Display controls';
+lang['view_canvas_ru'] = 'Рабочая диаграмма';
+lang['view_canvas_en'] = 'Winding diagram';
+lang['view_details_ru'] = 'Детализация схемы';
+lang['view_details_en'] = 'Enhanced view';
+lang['action_duplicate_ru'] = 'Дублировать';
+lang['action_duplicate_en'] = 'Duplicate';
+lang['action_reset_ru'] = 'Сброс';
+lang['action_reset_en'] = 'Reset';
+lang['quick_presets_ru'] = 'Быстрые пресеты';
+lang['quick_presets_en'] = 'Quick presets';
+lang['quality_score_ru'] = 'Итоговый уровень';
+lang['quality_score_en'] = 'Quality score';
+lang['quality_hint_ru'] = 'Рекомендация учитывает коэффициент, баланс, шаг и коггинг.';
+lang['quality_hint_en'] = 'Recommendation considers factor, balance, step and cogging.';
+lang['compare_delta_ru'] = 'Разница';
+lang['compare_delta_en'] = 'Delta';
+lang['compare_better_a_ru'] = 'Лучше: A';
+lang['compare_better_a_en'] = 'Better: A';
+lang['compare_better_b_ru'] = 'Лучше: B';
+lang['compare_better_b_en'] = 'Better: B';
+lang['compare_equal_ru'] = 'Схемы близки';
+lang['compare_equal_en'] = 'Schemes are close';
+lang['reset_done_ru'] = 'Результат очищен';
+lang['reset_done_en'] = 'Result cleared';
 
 // Заполняем недостающие RU ключи английскими, чтобы не было undefined
 for(var k in lang){
@@ -639,9 +677,9 @@ for(var k in lang){
 //sprache finden
 var selected_lang = (window.MotorI18n && typeof window.MotorI18n.getLang == 'function')
 	? window.MotorI18n.getLang()
-	: 'en';
-if(selected_lang !== 'ru' && selected_lang !== 'en' && selected_lang !== 'de'){
-	selected_lang = 'en';
+	: 'ru';
+if(selected_lang !== 'ru' && selected_lang !== 'en'){
+	selected_lang = 'ru';
 }
 
 //sprache wechseln
@@ -694,6 +732,7 @@ function jsStart(){
 	mainContainer.innerHTML += '<div id="mobile_calc_bar"><button type="button" id="mobileCalcBtn" onclick="if(document.getElementById(\'Berechnen\')){document.getElementById(\'Berechnen\').click();}">'+lang['berechnen_'+selected_lang]+'</button></div>';
 	setupEnhancedControls();
 	renderCalcActions();
+	applyWorkspaceLayout();
 	refreshHistoryTab();
 	
 	if(getVars['schema'] && getVars['pole'] && isNaN(getVars['schema'])){
@@ -760,6 +799,114 @@ function setupEnhancedControls(){
 	if(phase){ phase.value = enhancedView.phase; phase.onchange = function(){ enhancedView.phase = this.value; renderEnhancedView(act_schritt); }; }
 	if(dir){ dir.checked = enhancedView.showDirection; dir.onchange = function(){ enhancedView.showDirection = this.checked; renderEnhancedView(act_schritt); }; }
 	if(slots){ slots.checked = enhancedView.showSlots; slots.onchange = function(){ enhancedView.showSlots = this.checked; renderEnhancedView(act_schritt); }; }
+}
+
+function _createWorkspaceCard(titleText){
+	var card = document.createElement('section');
+	card.className = 'ml_card';
+	if(titleText){
+		var title = document.createElement('h3');
+		title.className = 'ml_card_title';
+		title.textContent = titleText;
+		card.appendChild(title);
+	}
+	return card;
+}
+
+function _appendIfExists(card, node){
+	if(card && node){
+		card.appendChild(node);
+	}
+}
+
+function applyWorkspaceLayout(){
+	var calcHost = document.getElementById('jsContainer');
+	if(!calcHost){
+		return;
+	}
+	var form = calcHost.querySelector('form');
+	var info = document.getElementById('info');
+	var calcActions = document.getElementById('calc_actions');
+	var rasten = document.getElementById('Rasten');
+	var ergebnis = document.getElementById('Ergebnis');
+	var nutf = document.getElementById('nutfacktor');
+	var windingAssessment = document.getElementById('winding_assessment');
+	var magnetAdvice = document.getElementById('magnet_advice');
+	var links = document.getElementById('link_container');
+	var mobileBar = document.getElementById('mobile_calc_bar');
+	var layout = document.getElementById('mlCalcLayout');
+
+	if(!layout){
+		layout = document.createElement('div');
+		layout.id = 'mlCalcLayout';
+		layout.className = 'ml_calc_layout';
+		calcHost.insertBefore(layout, calcHost.firstChild);
+	}
+	layout.innerHTML = '';
+
+	var left = document.createElement('div');
+	left.className = 'ml_calc_col ml_calc_col_left';
+	var right = document.createElement('div');
+	right.className = 'ml_calc_col ml_calc_col_right';
+
+	var setupCard = _createWorkspaceCard(lang['calc_setup_'+selected_lang] || 'Motor setup');
+	_appendIfExists(setupCard, form);
+	_appendIfExists(setupCard, info);
+	left.appendChild(setupCard);
+
+	var actionsCard = _createWorkspaceCard(lang['calc_actions_title_'+selected_lang] || 'Actions');
+	_appendIfExists(actionsCard, calcActions);
+	_appendIfExists(actionsCard, links);
+	left.appendChild(actionsCard);
+
+	var advancedCard = _createWorkspaceCard(lang['calc_advanced_title_'+selected_lang] || 'Advanced');
+	_appendIfExists(advancedCard, nutf);
+	left.appendChild(advancedCard);
+
+	var overviewCard = _createWorkspaceCard(lang['calc_overview_title_'+selected_lang] || 'Overview');
+	_appendIfExists(overviewCard, rasten);
+	_appendIfExists(overviewCard, ergebnis);
+	right.appendChild(overviewCard);
+
+	var windingCard = _createWorkspaceCard(lang['calc_winding_title_'+selected_lang] || 'Winding assessment');
+	_appendIfExists(windingCard, windingAssessment);
+	right.appendChild(windingCard);
+
+	var magnetCard = _createWorkspaceCard(lang['calc_magnet_title_'+selected_lang] || 'Magnet advisor');
+	_appendIfExists(magnetCard, magnetAdvice);
+	right.appendChild(magnetCard);
+
+	layout.appendChild(left);
+	layout.appendChild(right);
+	_appendIfExists(calcHost, mobileBar);
+
+	var visualHost = document.getElementById('visual_workspace');
+	var steps = document.getElementById('steps');
+	var canvas = document.getElementById('canvas_container');
+	var enhControls = document.getElementById('enhanced_controls');
+	var enhView = document.getElementById('enhanced_view');
+	if(visualHost){
+		visualHost.innerHTML = '';
+		var vControls = _createWorkspaceCard(lang['view_controls_'+selected_lang] || 'Display controls');
+		_appendIfExists(vControls, enhControls);
+		var vCanvas = _createWorkspaceCard(lang['view_canvas_'+selected_lang] || 'Winding diagram');
+		_appendIfExists(vCanvas, steps);
+		_appendIfExists(vCanvas, canvas);
+		var vEnhanced = _createWorkspaceCard(lang['view_details_'+selected_lang] || 'Enhanced view');
+		_appendIfExists(vEnhanced, enhView);
+		visualHost.appendChild(vControls);
+		visualHost.appendChild(vCanvas);
+		visualHost.appendChild(vEnhanced);
+	}
+
+	var compareHost = document.getElementById('compare_workspace');
+	var engineering = document.getElementById('engineering_tools');
+	if(compareHost){
+		compareHost.innerHTML = '';
+		var compareCard = _createWorkspaceCard(lang['compare_title_'+selected_lang] || 'Scheme comparison');
+		_appendIfExists(compareCard, engineering);
+		compareHost.appendChild(compareCard);
+	}
 }
 
 function getPresets(){
@@ -883,9 +1030,11 @@ function renderCalcActions(){
 	var html = '';
 	html += '<div class="calc_actions_row">';
 	html += '<button type="button" class="calc_action_btn" onclick="saveCurrentCalc();">'+lang['save_calc_'+selected_lang]+'</button>';
+	html += '<button type="button" class="calc_action_btn" onclick="duplicateCurrentCalc();">'+lang['action_duplicate_'+selected_lang]+'</button>';
 	html += '<button type="button" class="calc_action_btn" onclick="exportCurrentCalc(\'json\');">'+lang['export_calc_'+selected_lang]+' '+lang['exp_json_'+selected_lang]+'</button>';
 	html += '<button type="button" class="calc_action_btn" onclick="exportCurrentCalc(\'csv\');">'+lang['export_calc_'+selected_lang]+' '+lang['exp_csv_'+selected_lang]+'</button>';
 	html += '<button type="button" class="calc_action_btn" onclick="shareCurrentCalc();">'+lang['share_calc_'+selected_lang]+'</button>';
+	html += '<button type="button" class="calc_action_btn" onclick="resetCalculatorView();">'+lang['action_reset_'+selected_lang]+'</button>';
 	html += '</div>';
 	html += '<div class="calc_actions_row">';
 	html += '<label class="calc_action_label">'+lang['load_calc_'+selected_lang]+'</label>';
@@ -914,8 +1063,28 @@ function renderCalcActions(){
 	html += '<button type="button" class="calc_action_btn" onclick="applyPreset();">'+lang['apply_'+selected_lang]+'</button>';
 	html += '<button type="button" class="calc_action_btn" onclick="saveCurrentAsPreset();">'+lang['preset_save_'+selected_lang]+'</button>';
 	html += '</div>';
+	html += '<div class="quick_preset_wrap"><div class="calc_action_label">'+lang['quick_presets_'+selected_lang]+'</div><div class="quick_preset_grid">';
+	var maxPresetButtons = presets.length > 6 ? 6 : presets.length;
+	for(var q=0;q<maxPresetButtons;q++){
+		var pLabel = presets[q].label || (presets[q].nuten+' / '+presets[q].pole);
+		html += '<button type="button" class="quick_preset_btn" onclick="applyPresetById(\''+presets[q].id+'\');">'+pLabel+'</button>';
+	}
+	html += '</div></div>';
 	html += '<div id="calc_action_status" class="calc_action_status"></div>';
 	host.innerHTML = html;
+}
+
+function applyPresetById(id){
+	if(!id){
+		return;
+	}
+	var presets = getPresets();
+	for(var i=0;i<presets.length;i++){
+		if(presets[i].id == id){
+			applyPayload(presets[i]);
+			return;
+		}
+	}
 }
 
 function applyPayload(payload){
@@ -976,6 +1145,32 @@ function saveCurrentCalc(){
 	renderCalcActions();
 	calcStatusMessage(lang['saved_ok_'+selected_lang]);
 	refreshHistoryTab();
+}
+
+function duplicateCurrentCalc(){
+	var payload = buildCurrentPayload();
+	if(!payload){
+		return;
+	}
+	var baseName = payload.name && payload.name.length ? payload.name : (payload.isSchema ? payload.nuten : (payload.nuten+' / '+payload.pole));
+	payload.name = baseName + ' (copy)';
+	payload.favorite = false;
+	var saved = readSavedCalcs();
+	saved.unshift(payload);
+	if(saved.length > 20){
+		saved = saved.slice(0,20);
+	}
+	writeSavedCalcs(saved);
+	renderCalcActions();
+	calcStatusMessage(lang['saved_ok_'+selected_lang]);
+	refreshHistoryTab();
+}
+
+function resetCalculatorView(){
+	if(typeof clearResult == 'function'){
+		clearResult();
+	}
+	calcStatusMessage(lang['reset_done_'+selected_lang]);
 }
 
 function renameSavedCalc(){
@@ -1488,6 +1683,11 @@ function renderEngineeringTools(){
 	var html = '<div class="eng_tools_panel">';
 	html += '<div class="eng_tools_title">'+lang['eng_tools_title_'+selected_lang]+'</div>';
 	html += '<div class="eng_quality_row"><span>'+lang['quality_title_'+selected_lang]+'</span><span class="eng_badge '+metrics.qualityClass+'">'+metrics.qualityText+'</span></div>';
+	html += '<div class="quality_score_panel '+metrics.qualityClass+'">';
+	html += '<div class="quality_score_head">'+lang['quality_score_'+selected_lang]+'</div>';
+	html += '<div class="quality_score_value">'+metrics.qualityAvg+'/100</div>';
+	html += '<div class="quality_score_hint">'+lang['quality_hint_'+selected_lang]+'</div>';
+	html += '</div>';
 	html += '<div class="eng_reco_grid">';
 	html += '<div class="eng_reco_item"><span>'+lang['recommend_shortening_'+selected_lang]+'</span><b>'+rec.shortening+'</b></div>';
 	html += '<div class="eng_reco_item"><span>'+lang['recommend_layer_'+selected_lang]+'</span><b>'+rec.layer+'</b></div>';
@@ -1512,6 +1712,7 @@ function renderEngineeringTools(){
 	html += '<button type="button" class="calc_action_btn" onclick="compareWithBestHistory();">'+lang['compare_best_'+selected_lang]+'</button>';
 	html += '</div><div id="eng_compare_result"></div></div></div>';
 	host.innerHTML = html;
+	applyWorkspaceLayout();
 	if(all.length > 1){
 		var b = document.getElementById('compareB');
 		if(b){ b.selectedIndex = 1; }
@@ -1544,14 +1745,27 @@ function runSchemeComparison(){
 	}
 	var ma = buildSchemeMetricsFromPayload(a);
 	var mb = buildSchemeMetricsFromPayload(b);
-	var html = '<table class="eng_compare_table"><thead><tr><th>Показатель</th><th>A</th><th>B</th></tr></thead><tbody>';
-	html += '<tr><td>'+lang['metric_wf_'+selected_lang]+'</td><td>'+ma.wf+'</td><td>'+mb.wf+'</td></tr>';
-	html += '<tr><td>'+lang['metric_balance_'+selected_lang]+'</td><td>'+ma.balance+'/100</td><td>'+mb.balance+'/100</td></tr>';
-	html += '<tr><td>'+lang['metric_step_'+selected_lang]+'</td><td>'+ma.step+'</td><td>'+mb.step+'</td></tr>';
-	html += '<tr><td>'+lang['metric_cogging_'+selected_lang]+'</td><td>'+ma.cogging+'</td><td>'+mb.cogging+'</td></tr>';
-	html += '<tr><td>'+lang['metric_complexity_'+selected_lang]+'</td><td>'+ma.complexity+'</td><td>'+mb.complexity+'</td></tr>';
-	html += '<tr><td>'+lang['quality_title_'+selected_lang]+'</td><td><span class="eng_badge '+ma.qualityClass+'">'+ma.qualityText+'</span></td><td><span class="eng_badge '+mb.qualityClass+'">'+mb.qualityText+'</span></td></tr>';
-	html += '</tbody></table>';
+	var scoreDelta = ma.qualityAvg - mb.qualityAvg;
+	var decision = lang['compare_equal_'+selected_lang];
+	if(scoreDelta > 2){ decision = lang['compare_better_a_'+selected_lang]; }
+	if(scoreDelta < -2){ decision = lang['compare_better_b_'+selected_lang]; }
+	var html = '<div class="compare_dual_cards">';
+	html += '<article class="compare_card"><h4>A</h4>';
+	html += '<div class="compare_metric"><span>'+lang['metric_wf_'+selected_lang]+'</span><b>'+ma.wf+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_balance_'+selected_lang]+'</span><b>'+ma.balance+'/100</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_step_'+selected_lang]+'</span><b>'+ma.step+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_cogging_'+selected_lang]+'</span><b>'+ma.cogging+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['quality_title_'+selected_lang]+'</span><b><span class="eng_badge '+ma.qualityClass+'">'+ma.qualityText+'</span></b></div>';
+	html += '</article>';
+	html += '<article class="compare_card"><h4>B</h4>';
+	html += '<div class="compare_metric"><span>'+lang['metric_wf_'+selected_lang]+'</span><b>'+mb.wf+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_balance_'+selected_lang]+'</span><b>'+mb.balance+'/100</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_step_'+selected_lang]+'</span><b>'+mb.step+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['metric_cogging_'+selected_lang]+'</span><b>'+mb.cogging+'</b></div>';
+	html += '<div class="compare_metric"><span>'+lang['quality_title_'+selected_lang]+'</span><b><span class="eng_badge '+mb.qualityClass+'">'+mb.qualityText+'</span></b></div>';
+	html += '</article>';
+	html += '</div>';
+	html += '<div class="compare_summary"><span>'+lang['compare_delta_'+selected_lang]+': '+Math.abs(scoreDelta)+'</span><b>'+decision+'</b></div>';
 	out.innerHTML = html;
 }
 
@@ -2294,7 +2508,9 @@ function mit_schema(){
 function Schema_ausgeben(nuten,pole,schema,fehler,SPS,schema_y){
 	nutenx = nuten;
 	schemax = schema;
-	schema_y = normalisiereSchemaAnzeige(schema_y);
+	if(!vonHand){
+		schema_y = normalisiereSchemaAnzeige(schema_y);
+	}
 	schemay = schema_y;
 	polex = pole;
 	s_advanced = false;
@@ -2416,7 +2632,9 @@ function Schema_ausgeben(nuten,pole,schema,fehler,SPS,schema_y){
 	if(verteilt){
 		zeichnen_schema = verteiltZuKlassisch(verteilt);
 	}
-	zeichnen_schema = normalisiereSchemaAnzeige(zeichnen_schema);
+	if(!vonHand){
+		zeichnen_schema = normalisiereSchemaAnzeige(zeichnen_schema);
+	}
 	currentResultMeta.schema = zeichnen_schema;
 	drawStator(nuten,zeichnen_schema,false,schaltung);
 	renderEnhancedView(0);
@@ -3402,7 +3620,7 @@ function drawStator(nuten,schema,schritt,Y_D){
 	stator.closePath();
 	stator.fill();
 
-	stator.fillStyle = "#FFF";
+	stator.fillStyle = (document.documentElement && document.documentElement.classList && document.documentElement.classList.contains('theme-dark')) ? "#111B2F" : "#FFF";
 	stator.beginPath();
 	stator.arc(350,350,112,0,Math.PI*2,true);
 	stator.closePath();
@@ -3454,7 +3672,7 @@ function drawStator(nuten,schema,schritt,Y_D){
 		stator.rotate(Math.PI/(nuten/2));
 	}
 	
-	stator.fillStyle = "#111";
+	stator.fillStyle = (document.documentElement && document.documentElement.classList && document.documentElement.classList.contains('theme-dark')) ? "#D8E4F6" : "#111";
 
 	pole_dazu();
 	var Swikel = schema.substr(0,schritt).split('/');
@@ -4019,7 +4237,7 @@ function WF_FFT(schema,SPS){
 function blink(id){
 	var inpute = document.getElementById(id);
 	inpute.style.backgroundColor="#E7796D";
-	setTimeout('document.getElementById("'+id+'").style.backgroundColor="#FFF"',300);
+	setTimeout('document.getElementById("'+id+'").style.backgroundColor=(document.documentElement.classList.contains("theme-dark")?"#111B2F":"#FFF")',300);
 	
 }
 

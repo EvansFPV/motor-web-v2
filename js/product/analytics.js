@@ -2,7 +2,7 @@
   var root = window.MotorProduct = window.MotorProduct || {};
   var queue = [];
   var initialized = false;
-  var buildVersion = '1.0.1';
+  var buildVersion = '1.1.0-beta';
   var installSource = 'browser';
 
   function platform(){

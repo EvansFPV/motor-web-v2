@@ -16,7 +16,7 @@
     (function(){
       try{
         var t = localStorage.getItem("ui_theme");
-        if(!t){ t = "light"; }
+        if(!t){ t = "dark"; }
         if(t === "dark"){
           document.documentElement.classList.add("theme-dark");
         }
@@ -57,15 +57,21 @@
           <button id="updateAppBtn" class="update_btn" type="button" data-i18n="update_app">Обновить приложение</button>
           <span id="updateStatus" class="update_status" hidden aria-live="polite"></span>
           <button id="themeToggle" class="theme_btn" type="button" data-i18n="theme_dark" aria-label="Переключить тему">🌙</button>
-          <button id="langToggle" class="lang_btn" type="button">EN</button>
+          <label for="lang-switch" hidden>Language</label>
+          <select id="lang-switch" class="lang_btn" aria-label="Language switcher">
+            <option value="ru">RU</option>
+            <option value="en">EN</option>
+          </select>
         </div>
       </div>
     </header>
 
-    <nav class="tabs" aria-label="Вкладки">
-      <button class="tab_btn is_active" data-tab-target="tab_calc" type="button" data-i18n="tab_calc">Калькулятор</button>
-      <button class="tab_btn" data-tab-target="tab_help" type="button" data-i18n="tab_help">Справка</button>
-      <button class="tab_btn" data-tab-target="tab_history" type="button" data-i18n="tab_history">История</button>
+    <nav class="tabs" aria-label="Main sections">
+      <button class="tab_btn is_active" data-tab-target="tab_calc" type="button" data-i18n="tab_calc">Calculator</button>
+      <button class="tab_btn" data-tab-target="tab_visual" type="button" data-i18n="tab_visual">Visual</button>
+      <button class="tab_btn" data-tab-target="tab_compare" type="button" data-i18n="tab_compare">Compare</button>
+      <button class="tab_btn" data-tab-target="tab_projects" type="button" data-i18n="tab_projects">Projects</button>
+      <button class="tab_btn" data-tab-target="tab_help" type="button" data-i18n="tab_help">Help</button>
     </nav>
 
     <section id="tab_calc" class="tab_panel is_active">
@@ -75,6 +81,26 @@
       </div>
       <div id="jsContainer">
         <span class="keinscript">Для работы калькулятора включите JavaScript.</span>
+      </div>
+    </section>
+
+    <section id="tab_visual" class="tab_panel visual_panel" aria-live="polite">
+      <div class="panel_intro">
+        <h2 data-i18n="visual_title">Визуализация</h2>
+        <p data-i18n="visual_subtitle">Рабочее пространство схемы и анимации намотки.</p>
+      </div>
+      <div id="visual_workspace" class="workspace_shell">
+        <div class="workspace_empty" data-i18n="visual_empty">Сначала выполните расчёт в разделе «Калькулятор».</div>
+      </div>
+    </section>
+
+    <section id="tab_compare" class="tab_panel compare_panel" aria-live="polite">
+      <div class="panel_intro">
+        <h2 data-i18n="compare_title_main">Сравнение схем</h2>
+        <p data-i18n="compare_subtitle">Сравнивайте варианты по коэффициенту, балансу, шагу и коггингу.</p>
+      </div>
+      <div id="compare_workspace" class="workspace_shell">
+        <div class="workspace_empty" data-i18n="compare_empty">Сначала выполните расчёт для построения метрик.</div>
       </div>
     </section>
 
@@ -225,7 +251,7 @@
               <td class="warn">AcBaCb</td>
               <td class="ok1">ACaBAbCbC</td>
               <td class="ok2">AacCBbaACcbB</td>
-              <td class="ok2">AaAaABbbBbDCcCcC</td>
+              <td class="ok2">AaAaABbbBbCCcCcC</td>
               <td class="ok1">AabcCABbcaABCcabbC</td>
               <td>7</td>
             </tr>
@@ -235,7 +261,7 @@
               <td class="warn">ABCABC</td>
               <td class="warn">AAbCcAaBBc</td>
               <td class="ok1">ABCABCABCABC</td>
-              <td class="ok2">AaaAaCceCcCbbBbB</td>
+              <td class="ok2">AaaAaCcCcCbbBbB</td>
               <td class="ok2">AaABbBCcCAaABbBCcC</td>
               <td>8</td>
             </tr>
@@ -333,7 +359,7 @@
         </details>
       </div>
     </section>
-    <section id="tab_history" class="tab_panel history_panel" aria-live="polite">
+    <section id="tab_projects" class="tab_panel history_panel" aria-live="polite">
       <div class="history_toolbar">
         <input id="history_search" class="history_search" type="search" placeholder="Поиск..." data-i18n-placeholder="history_search_ph" />
         <label class="history_fav_toggle">
@@ -456,11 +482,17 @@
         tabButtons[i].addEventListener("click", function () {
           var target = this.getAttribute("data-tab-target");
           activateTab(target);
-          if (target === "tab_history" && typeof refreshHistoryTab === "function") {
+          if (typeof applyWorkspaceLayout === "function") {
+            applyWorkspaceLayout();
+          }
+          if (target === "tab_projects" && typeof refreshHistoryTab === "function") {
             refreshHistoryTab();
             if (window.MotorProduct && window.MotorProduct.analytics) {
               window.MotorProduct.analytics.capture("history_opened", {});
             }
+          }
+          if (target === "tab_compare" && window.MotorProduct && window.MotorProduct.analytics) {
+            window.MotorProduct.analytics.capture("compare_opened", {});
           }
           if (target === "tab_help" && window.MotorProduct && window.MotorProduct.analytics) {
             window.MotorProduct.analytics.capture("help_opened", {});
@@ -483,7 +515,7 @@
         }, 150);
       });
 
-      var locale = (window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "en";
+      var locale = (window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "ru";
       var currentTheme = document.documentElement.classList.contains("theme-dark") ? "dark" : "light";
       function initMobilePlatformTweaks(){
         var ua = (navigator.userAgent || "").toLowerCase();
@@ -699,13 +731,15 @@
           triggerMobileRelayout();
         });
       }
-      var dict = {
+      var i18nPayload = {
         ru: {
           title: "MotorLab",
           subtitle: "MotorLab — инструмент проектирования электродвигателей",
           tab_calc: "Калькулятор",
           tab_help: "Справка",
-          tab_history: "История",
+          tab_visual: "Визуализация",
+          tab_compare: "Сравнение",
+          tab_projects: "Проекты",
           theme_dark: "Тёмная тема",
           theme_light: "Светлая тема",
           auth_login: "Войти",
@@ -796,14 +830,22 @@
           help_u4: "<strong>Тема:</strong> переключатель в шапке меняет светлую/тёмную тему и запоминается локально.",
           help_u5: "<strong>PWA:</strong> кнопку «Установить на телефон/ПК» можно использовать для установки как приложения; базовая работа доступна офлайн через service worker.",
           history_search_ph: "Поиск по истории...",
-          history_only_fav: "Только избранное"
+          history_only_fav: "Только избранное",
+          visual_title: "Визуализация",
+          visual_subtitle: "Рабочее пространство схемы и анимации намотки.",
+          visual_empty: "Сначала выполните расчёт в разделе «Калькулятор».",
+          compare_title_main: "Сравнение схем",
+          compare_subtitle: "Сравнивайте варианты по коэффициенту, балансу, шагу и коггингу.",
+          compare_empty: "Сначала выполните расчёт для построения метрик."
         },
         en: {
           title: "MotorLab",
           subtitle: "MotorLab — Electric Motor Design Tool",
           tab_calc: "Calculator",
           tab_help: "Help",
-          tab_history: "History",
+          tab_visual: "Visual",
+          tab_compare: "Compare",
+          tab_projects: "Projects",
           theme_dark: "Dark theme",
           theme_light: "Light theme",
           auth_login: "Sign in",
@@ -894,27 +936,27 @@
           help_u4: "<strong>Theme:</strong> header switch toggles light/dark theme and stores preference locally.",
           help_u5: "<strong>PWA:</strong> use “Install on phone/PC” to install as an app; base offline usage is available via service worker.",
           history_search_ph: "Search history...",
-          history_only_fav: "Only favorites"
+          history_only_fav: "Only favorites",
+          visual_title: "Visual workspace",
+          visual_subtitle: "Dedicated winding drawing and animation area.",
+          visual_empty: "Run calculation first in the Calculator section.",
+          compare_title_main: "Scheme comparison",
+          compare_subtitle: "Compare variants by factor, balance, step, and cogging.",
+          compare_empty: "Run calculation first to build metrics."
         }
       };
+      if (window.MotorI18n && typeof window.MotorI18n.extend === "function") {
+        window.MotorI18n.extend(i18nPayload);
+      }
+      function tr(key, fallback){
+        if (window.MotorI18n && typeof window.MotorI18n.t === "function") {
+          return window.MotorI18n.t(key, fallback);
+        }
+        return (typeof fallback === "undefined") ? key : fallback;
+      }
       var updateStatusKey = "";
       function getUpdateStatusText(key){
-        var ru = {
-          checking: "Проверка обновлений…",
-          available: "Доступно обновление",
-          applying: "Обновление применяется…",
-          up_to_date: "Версия актуальна",
-          error: "Не удалось проверить обновления"
-        };
-        var en = {
-          checking: "Checking updates…",
-          available: "Update available",
-          applying: "Applying update…",
-          up_to_date: "Up to date",
-          error: "Failed to check updates"
-        };
-        var table = (locale === "en") ? en : ru;
-        return table[key] || "";
+        return tr("update_status_" + key, "");
       }
       function renderUpdateStatus(){
         var statusNode = document.getElementById("updateStatus");
@@ -937,28 +979,24 @@
       }
 
       function applyLocale(lang){
-        locale = (lang === "ru") ? "ru" : "en";
+        locale = (lang === "en") ? "en" : "ru";
         if (window.MotorI18n && typeof window.MotorI18n.setLang === "function") {
           locale = window.MotorI18n.setLang(locale);
         } else {
           try { localStorage.setItem("lang", locale); } catch (e) {}
         }
-        var nodes = document.querySelectorAll("[data-i18n]");
-        for (var i = 0; i < nodes.length; i++) {
-          var key = nodes[i].getAttribute("data-i18n");
-          if (dict[locale] && dict[locale][key]) {
-            nodes[i].innerHTML = dict[locale][key];
-          }
+        if (window.MotorI18n && typeof window.MotorI18n.applyI18n === "function") {
+          window.MotorI18n.applyI18n(document);
         }
-        var btn = document.getElementById("langToggle");
-        if (btn) {
-          btn.textContent = locale === "ru" ? "EN" : "RU";
+        var select = document.getElementById("lang-switch");
+        if (select && select.value !== locale) {
+          select.value = locale;
         }
         var themeBtn = document.getElementById("themeToggle");
-        if (themeBtn && dict[locale]) {
+        if (themeBtn) {
           themeBtn.textContent = "🌙";
-          themeBtn.setAttribute("title", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
-          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
+          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
         }
         if (typeof setlang === "function") {
           setlang(locale);
@@ -966,15 +1004,8 @@
         if (window.MotorProduct && window.MotorProduct.authUI && typeof window.MotorProduct.authUI.updateHeaderState === "function") {
           window.MotorProduct.authUI.updateHeaderState();
         }
-        var phNodes = document.querySelectorAll("[data-i18n-placeholder]");
-        for (var p = 0; p < phNodes.length; p++) {
-          var pkey = phNodes[p].getAttribute("data-i18n-placeholder");
-          if (dict[locale] && dict[locale][pkey]) {
-            phNodes[p].setAttribute("placeholder", dict[locale][pkey]);
-          }
-        }
         if (installBtn && installBtn.disabled) {
-          installBtn.textContent = dict[lang].installed_app;
+          installBtn.textContent = tr("installed_app", "Installed");
         }
         renderUpdateStatus();
         if (!tourOverlay.hidden) {
@@ -1067,7 +1098,8 @@
           if (cell.classList.contains("bad") || cell.classList.contains("na")) {
             return false;
           }
-          var raw = (cell.textContent || "").trim().toLowerCase();
+          var rawText = (cell.textContent || "").trim();
+          var raw = rawText.toLowerCase();
           if (!raw || raw === "—" || raw === "-" || raw === "нет данных" || raw === "no data") {
             return false;
           }
@@ -1081,8 +1113,68 @@
             return false;
           }
           activateTab("tab_calc");
-          document.Windungsrechner.Nuten.value = String(slots);
           document.Windungsrechner.Pole.value = String(poles);
+
+          function normalizeTableSchemeToken(token){
+            var s = (token || "").replace(/\s+/g, "");
+            if (!s) {
+              return "";
+            }
+            // Keep compatibility with manual-schema aliases.
+            s = s.replace(/U/g, "A").replace(/u/g, "a");
+            s = s.replace(/V/g, "B").replace(/v/g, "b");
+            s = s.replace(/W/g, "C").replace(/w/g, "c");
+            // Some legacy table strings may contain accidental D/d; map to C/c.
+            s = s.replace(/D/g, "C").replace(/d/g, "c");
+            s = s.replace(/[^AaBbCc\/\|\-]/g, "");
+            return s;
+          }
+
+          function extractSchemeFromCellText(text, expectedSlots){
+            var src = (text || "").replace(/\s+/g, "");
+            if (!src) {
+              return { scheme: "", matched: false };
+            }
+            var parts = src.match(/[AaBbCcUuVvWw\/\|\-]+/g) || [];
+            if (!parts.length) {
+              return { scheme: "", matched: false };
+            }
+            var best = "";
+            var exact = "";
+            for (var i = 0; i < parts.length; i++) {
+              var p = normalizeTableSchemeToken(parts[i] || "");
+              if (!p) {
+                continue;
+              }
+              var lenNoSlash = p.replace(/\//g, "").length;
+              if (expectedSlots && lenNoSlash === expectedSlots) {
+                exact = p;
+                break;
+              }
+              if (!best || p.length > best.length) {
+                best = p;
+              }
+            }
+            if (exact) {
+              return { scheme: exact, matched: true };
+            }
+            return { scheme: best, matched: false };
+          }
+
+          // Prefer exact scheme from clicked table cell (case-sensitive),
+          // not just generic auto-generated slots/poles combination.
+          var schemePick = extractSchemeFromCellText(rawText, slots);
+          var schemeFromCell = schemePick.scheme;
+          if (schemeFromCell && schemePick.matched && typeof schema_eingeben === "function") {
+            schema_eingeben();
+            document.Windungsrechner.Nuten.value = schemeFromCell;
+            if (typeof mit_schema === "function") {
+              mit_schema();
+              return true;
+            }
+          }
+
+          document.Windungsrechner.Nuten.value = String(slots);
           if (typeof checkSPS === "function") {
             checkSPS(slots, poles, true);
           }
@@ -1115,23 +1207,21 @@
 
       window.addEventListener("resize", syncHelpAccordion);
 
-      var langToggle = document.getElementById("langToggle");
-      if (langToggle) {
-        langToggle.addEventListener("click", function () {
-          applyLocale(locale === "ru" ? "en" : "ru");
+      var langSwitch = document.getElementById("lang-switch");
+      if (langSwitch) {
+        langSwitch.addEventListener("change", function () {
+          applyLocale(this.value);
         });
       }
       function applyTheme(theme){
         currentTheme = (theme === "dark") ? "dark" : "light";
         document.documentElement.classList.toggle("theme-dark", currentTheme === "dark");
         try { localStorage.setItem("ui_theme", currentTheme); } catch (e) {}
-        if (dict[locale]) {
-          var themeBtn = document.getElementById("themeToggle");
-          if (themeBtn) {
-            themeBtn.textContent = "🌙";
-            themeBtn.setAttribute("title", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
-            themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
-          }
+        var themeBtn = document.getElementById("themeToggle");
+        if (themeBtn) {
+          themeBtn.textContent = "🌙";
+          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
         }
       }
       var themeToggle = document.getElementById("themeToggle");
@@ -1150,7 +1240,7 @@
         }
         if (installBtn.disabled) {
           installBtn.hidden = false;
-          installBtn.textContent = dict[locale].installed_app;
+          installBtn.textContent = tr("installed_app", "Installed");
           return;
         }
         installBtn.hidden = !deferredInstallPrompt;
@@ -1172,7 +1262,7 @@
         }
         if (installBtn) {
           installBtn.hidden = false;
-          installBtn.textContent = (dict[locale] && dict[locale].installed_app) ? dict[locale].installed_app : "Installed";
+          installBtn.textContent = tr("installed_app", "Installed");
           installBtn.disabled = true;
         }
       });
@@ -1403,8 +1493,8 @@
         tourStep.textContent = (stepIndex + 1) + " / " + steps.length;
         if (tourNextBtn) {
           tourNextBtn.textContent = (stepIndex === steps.length - 1)
-            ? dict[locale].tour_finish
-            : dict[locale].tour_next;
+            ? tr("tour_finish", "Finish")
+            : tr("tour_next", "Next");
         }
       }
 
@@ -1474,7 +1564,7 @@
 
       initMobilePlatformTweaks();
       if (window.MotorProduct && window.MotorProduct.analytics) {
-        window.MotorProduct.analytics.init({ buildVersion: "1.0.1" });
+        window.MotorProduct.analytics.init({ buildVersion: "1.1.0-beta" });
         if (window.MotorProduct.pro && window.MotorProduct.pro.getAccessState) {
           var st = window.MotorProduct.pro.getAccessState();
           window.MotorProduct.analytics.capture("subscription_status_checked", {
@@ -1492,7 +1582,7 @@
           }
         } catch (e) {}
       }
-      applyLocale((window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "en");
+      applyLocale((window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "ru");
       if (window.MotorProduct && window.MotorProduct.auth) {
         window.MotorProduct.auth.init().then(function(){
           if (window.MotorProduct.authUI) {

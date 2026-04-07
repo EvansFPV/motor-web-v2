@@ -2,6 +2,16 @@
   var dict = {
     en: {
       copy_link_prompt: 'Copy this link:',
+      theme_dark: 'Dark theme',
+      theme_light: 'Light theme',
+      installed_app: 'App installed',
+      tour_next: 'Next',
+      tour_finish: 'Finish',
+      update_status_checking: 'Checking updates…',
+      update_status_available: 'Update available',
+      update_status_applying: 'Applying update…',
+      update_status_up_to_date: 'Up to date',
+      update_status_error: 'Failed to check updates',
       auth_supabase_not_configured: 'Supabase is not configured',
       auth_signup_failed: 'Sign up failed',
       auth_signup_verify: 'Account created. Confirm your email to sign in.',
@@ -15,6 +25,16 @@
     },
     ru: {
       copy_link_prompt: 'Скопируйте ссылку:',
+      theme_dark: 'Тёмная тема',
+      theme_light: 'Светлая тема',
+      installed_app: 'Приложение установлено',
+      tour_next: 'Далее',
+      tour_finish: 'Готово',
+      update_status_checking: 'Проверка обновлений…',
+      update_status_available: 'Доступно обновление',
+      update_status_applying: 'Обновление применяется…',
+      update_status_up_to_date: 'Версия актуальна',
+      update_status_error: 'Не удалось проверить обновления',
       auth_supabase_not_configured: 'Supabase не настроен',
       auth_signup_failed: 'Ошибка регистрации',
       auth_signup_verify: 'Аккаунт создан. Подтвердите email для входа.',
@@ -29,12 +49,12 @@
   };
 
   function normalize(lang){
-    return (lang === 'ru') ? 'ru' : 'en';
+    return (lang === 'en') ? 'en' : 'ru';
   }
 
   function getLang(){
-    var saved = 'en';
-    try{ saved = localStorage.getItem('lang') || 'en'; }catch(e){}
+    var saved = 'ru';
+    try{ saved = localStorage.getItem('lang') || 'ru'; }catch(e){}
     return normalize((saved || '').toLowerCase());
   }
 
@@ -55,25 +75,40 @@
     return (typeof fallback !== 'undefined') ? fallback : key;
   }
 
+  function mergeLang(target, source){
+    if(!source){ return target; }
+    for(var key in source){
+      if(Object.prototype.hasOwnProperty.call(source, key)){
+        target[key] = source[key];
+      }
+    }
+    return target;
+  }
+
+  function extend(extraDict){
+    if(!extraDict){ return; }
+    if(extraDict.ru){ mergeLang(dict.ru, extraDict.ru); }
+    if(extraDict.en){ mergeLang(dict.en, extraDict.en); }
+  }
+
   function applyI18n(rootNode){
     var root = rootNode || document;
     if(!root || !root.querySelectorAll){
       return;
     }
-    var lang = getLang();
-    var nodes = root.querySelectorAll('[data-i18n-key]');
+    var nodes = root.querySelectorAll('[data-i18n]');
     for(var i=0;i<nodes.length;i++){
-      var key = nodes[i].getAttribute('data-i18n-key');
+      var key = nodes[i].getAttribute('data-i18n');
       if(!key){ continue; }
-      nodes[i].textContent = t(key);
+      nodes[i].innerHTML = t(key, nodes[i].innerHTML);
     }
-    var placeholders = root.querySelectorAll('[data-i18n-placeholder-key]');
+    var placeholders = root.querySelectorAll('[data-i18n-placeholder]');
     for(var p=0;p<placeholders.length;p++){
-      var pkey = placeholders[p].getAttribute('data-i18n-placeholder-key');
+      var pkey = placeholders[p].getAttribute('data-i18n-placeholder');
       if(!pkey){ continue; }
-      placeholders[p].setAttribute('placeholder', t(pkey));
+      placeholders[p].setAttribute('placeholder', t(pkey, placeholders[p].getAttribute('placeholder') || ''));
     }
-    return lang;
+    return getLang();
   }
 
   window.MotorI18n = {
@@ -81,7 +116,8 @@
     getLang: getLang,
     setLang: setLang,
     t: t,
-    applyI18n: applyI18n
+    applyI18n: applyI18n,
+    extend: extend
   };
   window.t = t;
 })();
