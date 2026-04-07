@@ -3691,8 +3691,8 @@ html.theme-dark .help_panel{
   }
 
   html.theme-dark .tabs{
-    display:grid;
-    grid-template-columns:repeat(5,minmax(0,1fr));
+    display:flex;
+    flex-wrap:wrap;
     gap:6px;
     padding:8px;
   }
@@ -3701,6 +3701,7 @@ html.theme-dark .help_panel{
     min-height:44px;
     font-size:12px;
     padding:8px 6px;
+    flex:1 1 calc(33.333% - 6px);
   }
 
   html.theme-dark .tab_panel{
@@ -3726,12 +3727,13 @@ html.theme-dark .help_panel{
   }
 
   html.theme-dark .tabs{
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
   }
 
-  html.theme-dark .tabs .tab_btn:nth-child(4),
-  html.theme-dark .tabs .tab_btn:nth-child(5){
-    grid-column:span 1;
+  html.theme-dark .tab_btn{
+    flex:1 1 calc(50% - 6px);
   }
 }
 
