@@ -4166,3 +4166,340 @@ html.theme-dark .eng_compare_table td:first-child{
     background:#1b2a43 !important;
   }
 }
+
+/* ===== Mobile Stabilization Patch (v1.1.0-beta) ===== */
+@media (max-width: 900px){
+  .app{
+    width:100%;
+    margin:0;
+    border-radius:0;
+    border-left:0;
+    border-right:0;
+  }
+
+  .header_row{
+    align-items:stretch;
+  }
+
+  .header_actions{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px;
+    width:100%;
+  }
+
+  .header_actions .user_chip{
+    grid-column:1 / -1;
+    max-width:none;
+    min-height:40px;
+    justify-content:center;
+  }
+
+  .header_actions > button,
+  .header_actions > select{
+    width:100%;
+    min-height:44px;
+  }
+
+  .tabs{
+    position:sticky;
+    top:0;
+    z-index:45;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:8px;
+    padding:8px max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+  }
+
+  .tab_btn{
+    width:100%;
+    min-height:44px;
+    padding:10px 8px;
+    border-radius:12px;
+  }
+
+  .tab_panel{
+    padding:10px max(10px, env(safe-area-inset-right)) 12px max(10px, env(safe-area-inset-left));
+  }
+
+  .toolbar{
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+
+  .toolbar .example_btn,
+  .toolbar .clear_btn{
+    flex:1 1 calc(50% - 8px);
+    min-width:0;
+    min-height:44px;
+  }
+
+  #mlCalcLayout{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+    align-items:stretch !important;
+  }
+
+  .ml_calc_col{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+    min-width:0;
+  }
+
+  .ml_card,
+  #calc_actions,
+  #advanced_panel,
+  #enhanced_view,
+  #canvas_container,
+  .eng_tools_panel,
+  .assessment_panel,
+  .magnet_panel,
+  .history_panel{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    margin:0 !important;
+    border-radius:14px !important;
+    overflow:hidden;
+  }
+
+  .calc_actions_row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .calc_action_btn,
+  .calc_action_select,
+  .history_search,
+  #jsContainer input,
+  #jsContainer select,
+  .adv_field_wrap input,
+  .adv_field_wrap select{
+    width:100%;
+    min-height:44px;
+    font-size:16px;
+  }
+
+  .eng_compare_controls{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .eng_compare_controls select,
+  .eng_compare_controls button{
+    width:100%;
+    min-height:44px;
+  }
+
+  .quick_preset_grid{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:8px;
+  }
+}
+
+@media (max-width: 640px){
+  body{
+    padding-bottom:calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .header_actions{
+    grid-template-columns:1fr;
+  }
+
+  .tabs{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+
+  .toolbar .example_btn,
+  .toolbar .clear_btn{
+    flex:1 1 100%;
+  }
+
+  .quick_preset_grid{
+    grid-template-columns:1fr;
+  }
+
+  #mobile_calc_bar{
+    left:0;
+    right:0;
+    bottom:var(--vv-bottom-offset, 0px);
+    z-index:95;
+  }
+}
+
+@media (max-width: 420px){
+  .tabs{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:6px;
+  }
+
+  .tab_btn{
+    min-height:42px;
+    font-size:13px;
+  }
+}
+
+html.theme-dark .panel_intro,
+html.theme-dark .enhanced_toolbar,
+html.theme-dark #enhanced_controls,
+html.theme-dark #advanced_panel,
+html.theme-dark .adv_block,
+html.theme-dark .help_acc_item,
+html.theme-dark .help_acc_item > summary{
+  background:#162338 !important;
+  border-color:#4a5a73 !important;
+  color:#e5e7eb;
+}
+
+html.theme-dark .panel_intro p,
+html.theme-dark .help_panel p,
+html.theme-dark .table_note{
+  color:#b8c7db !important;
+}
+
+/* ===== iPhone/Android Micro-Polish ===== */
+@media (max-width: 430px){
+  .app_header h1{
+    font-size:19px !important;
+    letter-spacing:.01em;
+  }
+
+  .app_header p{
+    font-size:12px !important;
+    line-height:1.35;
+  }
+
+  .tab_btn{
+    font-size:13px !important;
+    line-height:1.2;
+    white-space:normal;
+    word-break:break-word;
+    padding:8px 10px !important;
+  }
+
+  .toolbar{
+    margin-bottom:8px;
+  }
+
+  #jsContainer{
+    padding:8px !important;
+  }
+
+  .ml_card,
+  #calc_actions,
+  #advanced_panel,
+  .eng_tools_panel,
+  .assessment_panel,
+  .magnet_panel,
+  .history_panel{
+    padding:10px !important;
+    border-radius:12px !important;
+  }
+
+  .help_acc_item > summary{
+    font-size:14px !important;
+    padding:10px 11px !important;
+  }
+
+  .help_acc_body{
+    padding:0 9px !important;
+  }
+
+  .help_acc_item[open] > .help_acc_body{
+    padding:8px 9px 10px !important;
+  }
+
+  .table_wrap{
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    border-radius:10px;
+  }
+
+  .ref_table{
+    min-width:700px;
+  }
+
+  .history_toolbar,
+  .history_actions{
+    gap:8px;
+  }
+
+  .history_item{
+    padding:10px !important;
+  }
+
+  #mobileCalcBtn{
+    min-height:50px;
+    font-size:16px;
+    border-radius:12px;
+  }
+}
+
+@media (max-width: 390px){
+  .tabs{
+    padding:8px max(8px, env(safe-area-inset-right)) 8px max(8px, env(safe-area-inset-left)) !important;
+  }
+
+  .tab_panel{
+    padding:8px max(8px, env(safe-area-inset-right)) 10px max(8px, env(safe-area-inset-left)) !important;
+  }
+
+  .header_actions{
+    gap:6px;
+  }
+
+  .header_actions > button,
+  .header_actions > select{
+    min-height:42px;
+    font-size:13px;
+  }
+}
+
+html.theme-dark .ref_table th,
+html.theme-dark .ref_table td{
+  color:#dce7f6 !important;
+}
+
+html.theme-dark .help_acc_item > summary{
+  color:#e7eefb !important;
+}
+
+/* ===== Layout overlap guards ===== */
+#mlCalcLayout{
+  grid-auto-rows:minmax(min-content, max-content);
+}
+
+#mlCalcLayout .ml_card,
+#mlCalcLayout .eng_tools_panel,
+#mlCalcLayout .assessment_panel,
+#mlCalcLayout .magnet_panel,
+#mlCalcLayout #advanced_panel,
+#mlCalcLayout #calc_actions{
+  position:relative;
+  z-index:0;
+  min-height:0;
+  height:auto;
+}
+
+#mlCalcLayout .ml_card *{
+  min-width:0;
+}
+
+#mlCalcLayout .eng_tools_panel,
+#mlCalcLayout .assessment_panel,
+#mlCalcLayout .magnet_panel{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+#mlCalcLayout table{
+  display:block;
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
