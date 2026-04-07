@@ -1,5 +1,11 @@
 (function(){
   var root = window.MotorProduct = window.MotorProduct || {};
+  function i18nT(key, fallback){
+    if(window.MotorI18n && typeof window.MotorI18n.t === 'function'){
+      return window.MotorI18n.t(key, fallback);
+    }
+    return fallback || key;
+  }
 
   var state = {
     currentUser: null,
@@ -71,7 +77,7 @@
   function signUp(email, password){
     var sb = root.supabase && root.supabase.getClient ? root.supabase.getClient() : null;
     if(!sb){
-      return Promise.resolve({ok:false, message:'Supabase не настроен'});
+      return Promise.resolve({ok:false, message:i18nT('auth_supabase_not_configured', 'Supabase is not configured')});
     }
     state.loading = true;
     notify('loading');
@@ -79,7 +85,7 @@
       state.loading = false;
       notify('loading');
       if(res.error){
-        return {ok:false, message:res.error.message || 'Ошибка регистрации'};
+        return {ok:false, message:res.error.message || i18nT('auth_signup_failed', 'Sign up failed')};
       }
       var sessionUser = sessionUserFromResult(res);
       applyUser(sessionUser || null);
@@ -88,7 +94,7 @@
           ok:true,
           pendingVerification:true,
           data:res.data,
-          message:'Аккаунт создан. Подтвердите email для входа.'
+          message:i18nT('auth_signup_verify', 'Account created. Confirm your email to sign in.')
         };
       }
       return readProfile().then(function(){
@@ -97,14 +103,14 @@
     }).catch(function(){
       state.loading = false;
       notify('loading');
-      return {ok:false, message:'Ошибка сети при регистрации'};
+      return {ok:false, message:i18nT('auth_network_signup', 'Network error during sign up')};
     });
   }
 
   function signIn(email, password){
     var sb = root.supabase && root.supabase.getClient ? root.supabase.getClient() : null;
     if(!sb){
-      return Promise.resolve({ok:false, message:'Supabase не настроен'});
+      return Promise.resolve({ok:false, message:i18nT('auth_supabase_not_configured', 'Supabase is not configured')});
     }
     state.loading = true;
     notify('loading');
@@ -112,12 +118,12 @@
       state.loading = false;
       notify('loading');
       if(res.error){
-        return {ok:false, message:res.error.message || 'Ошибка входа'};
+        return {ok:false, message:res.error.message || i18nT('auth_signin_failed', 'Sign in failed')};
       }
       var sessionUser = sessionUserFromResult(res);
       if(!sessionUser){
         applyUser(null);
-        return {ok:false, message:'Сессия не создана. Проверьте подтверждение email и настройки входа.'};
+        return {ok:false, message:i18nT('auth_session_not_created', 'Session was not created. Check email confirmation and sign-in settings.')};
       }
       applyUser(sessionUser);
       return readProfile().then(function(){
@@ -126,7 +132,7 @@
     }).catch(function(){
       state.loading = false;
       notify('loading');
-      return {ok:false, message:'Ошибка сети при входе'};
+      return {ok:false, message:i18nT('auth_network_signin', 'Network error during sign in')};
     });
   }
 
@@ -139,12 +145,12 @@
     return sb.auth.signOut().then(function(res){
       applyUser(null);
       if(res && res.error){
-        return {ok:false, message:res.error.message || 'Ошибка выхода'};
+        return {ok:false, message:res.error.message || i18nT('auth_signout_failed', 'Sign out failed')};
       }
       return {ok:true};
     }).catch(function(){
       applyUser(null);
-      return {ok:false, message:'Ошибка сети при выходе'};
+      return {ok:false, message:i18nT('auth_network_signout', 'Network error during sign out')};
     });
   }
 

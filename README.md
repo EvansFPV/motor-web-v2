@@ -1,5 +1,6 @@
 # MotorLab
 
+## English
 MotorLab is a browser-based electric motor winding and magnet design tool for fast BLDC scheme exploration, engineering checks, and mobile-friendly workflows.
 
 ## Status
@@ -33,7 +34,13 @@ MotorLab is a static web application. You can deploy it on Vercel, Netlify, GitH
 
 ### Vercel
 - `vercel.json` is included for rewrites and cache headers.
-- Import the repository and deploy with static defaults.
+- If your repository contains this app in a subfolder (for example `motor web v2/`), set **Project Settings → Root Directory** to that subfolder.
+- Keep app paths root-relative (`/icons/...`, `/manifest.json`) and ensure Vercel serves the app from the selected root.
+- After changing root directory, redeploy once and verify:
+  - `/icons/apple-touch-icon.png`
+  - `/icons/favicon-32.png`
+  - `/manifest.json`
+- Detailed troubleshooting: [`docs/vercel-root-directory.md`](./docs/vercel-root-directory.md)
 
 ### Netlify
 - `netlify.toml` is included for publish root, redirects, and headers.
@@ -104,3 +111,33 @@ tests/
 No final license text is committed yet.
 Before publishing a formal open-source release, choose a license and add a root `LICENSE` file.
 See [`LICENSE-CHOICE.md`](./LICENSE-CHOICE.md).
+
+## Русский
+MotorLab — это веб-инструмент для расчета схем обмотки и подбора магнитов BLDC, с инженерными проверками, визуализацией и мобильным UX.
+
+### Статус
+Текущая публичная база: `1.0.3` (production-candidate: стабильный калькулятор, PWA-оболочка, опциональные Supabase-хуки).
+
+### Ключевые возможности
+- Калькулятор обмоток (пазы/полюса и режим ручной схемы)
+- Визуализация намотки и расширенные режимы отображения
+- Магнитный советник (полюсный шаг, покрытие, рекомендуемая ширина, предупреждения)
+- Сравнение схем и инженерная оценка
+- История, пресеты, экспорт JSON/CSV, share-ссылка
+- Установка как PWA + офлайн-оболочка
+- Гостевой режим по умолчанию + опциональная синхронизация через Supabase
+
+### Быстрый запуск
+```bash
+python3 -m http.server 8080
+```
+Откройте `http://localhost:8080`.
+
+### Деплой
+- Vercel/Netlify/GitHub Pages/Nginx — как статический сайт.
+- Для Vercel при структуре с подпапкой укажите **Root Directory = `motor web v2`**.
+- После изменения иконок/manifest обновите PWA-кэш один раз.
+
+### Supabase (опционально)
+- Вставляйте только публичный `supabaseAnonKey` в фронтенд.
+- Никогда не используйте service-role key в клиентском коде.

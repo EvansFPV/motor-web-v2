@@ -359,6 +359,7 @@
     </div>
   </div>
 
+  <script src="./js/i18n.js"></script>
   <script src="./js/product/supabase.js"></script>
   <script src="./js/product/auth.js"></script>
   <script src="./js/product/user-data.js"></script>
@@ -482,7 +483,7 @@
         }, 150);
       });
 
-      var locale = "ru";
+      var locale = (window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "en";
       var currentTheme = document.documentElement.classList.contains("theme-dark") ? "dark" : "light";
       function initMobilePlatformTweaks(){
         var ua = (navigator.userAgent || "").toLowerCase();
@@ -936,26 +937,31 @@
       }
 
       function applyLocale(lang){
-        locale = lang;
+        locale = (lang === "ru") ? "ru" : "en";
+        if (window.MotorI18n && typeof window.MotorI18n.setLang === "function") {
+          locale = window.MotorI18n.setLang(locale);
+        } else {
+          try { localStorage.setItem("lang", locale); } catch (e) {}
+        }
         var nodes = document.querySelectorAll("[data-i18n]");
         for (var i = 0; i < nodes.length; i++) {
           var key = nodes[i].getAttribute("data-i18n");
-          if (dict[lang] && dict[lang][key]) {
-            nodes[i].innerHTML = dict[lang][key];
+          if (dict[locale] && dict[locale][key]) {
+            nodes[i].innerHTML = dict[locale][key];
           }
         }
         var btn = document.getElementById("langToggle");
         if (btn) {
-          btn.textContent = lang === "ru" ? "EN" : "RU";
+          btn.textContent = locale === "ru" ? "EN" : "RU";
         }
         var themeBtn = document.getElementById("themeToggle");
-        if (themeBtn && dict[lang]) {
+        if (themeBtn && dict[locale]) {
           themeBtn.textContent = "🌙";
-          themeBtn.setAttribute("title", currentTheme === "dark" ? dict[lang].theme_light : dict[lang].theme_dark);
-          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[lang].theme_light : dict[lang].theme_dark);
+          themeBtn.setAttribute("title", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? dict[locale].theme_light : dict[locale].theme_dark);
         }
         if (typeof setlang === "function") {
-          setlang(lang);
+          setlang(locale);
         }
         if (window.MotorProduct && window.MotorProduct.authUI && typeof window.MotorProduct.authUI.updateHeaderState === "function") {
           window.MotorProduct.authUI.updateHeaderState();
@@ -963,8 +969,8 @@
         var phNodes = document.querySelectorAll("[data-i18n-placeholder]");
         for (var p = 0; p < phNodes.length; p++) {
           var pkey = phNodes[p].getAttribute("data-i18n-placeholder");
-          if (dict[lang] && dict[lang][pkey]) {
-            phNodes[p].setAttribute("placeholder", dict[lang][pkey]);
+          if (dict[locale] && dict[locale][pkey]) {
+            phNodes[p].setAttribute("placeholder", dict[locale][pkey]);
           }
         }
         if (installBtn && installBtn.disabled) {
@@ -1486,7 +1492,7 @@
           }
         } catch (e) {}
       }
-      applyLocale("ru");
+      applyLocale((window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "en");
       if (window.MotorProduct && window.MotorProduct.auth) {
         window.MotorProduct.auth.init().then(function(){
           if (window.MotorProduct.authUI) {

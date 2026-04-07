@@ -5,6 +5,12 @@
   var syncTimer = 0;
 
   function analytics(){ return root.analytics; }
+  function i18nT(key, fallback){
+    if(window.MotorI18n && typeof window.MotorI18n.t === 'function'){
+      return window.MotorI18n.t(key, fallback);
+    }
+    return fallback || key;
+  }
 
   function readLocalProjects(){
     try{
@@ -164,7 +170,7 @@
     if(!local.length){
       return Promise.resolve({ok:false, reason:'no_local'});
     }
-    var ask = window.confirm('Найдены локальные проекты. Импортировать их в аккаунт?');
+    var ask = window.confirm(i18nT('userdata_import_local_confirm', 'Local projects were found. Import them into your account?'));
     if(!ask){
       return Promise.resolve({ok:false, reason:'user_skipped'});
     }

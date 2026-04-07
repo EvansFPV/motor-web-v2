@@ -637,16 +637,21 @@ for(var k in lang){
 }
 
 //sprache finden
-var selected_lang = 'ru';
-for(i = 1; i<lang.length;i++){
-	if(navigator.userAgent.toLowerCase().indexOf('; '+lang[i]) !=-1){
-		selected_lang = lang[i];
-	}
+var selected_lang = (window.MotorI18n && typeof window.MotorI18n.getLang == 'function')
+	? window.MotorI18n.getLang()
+	: 'en';
+if(selected_lang !== 'ru' && selected_lang !== 'en' && selected_lang !== 'de'){
+	selected_lang = 'en';
 }
 
 //sprache wechseln
 function setlang (id){
 	selected_lang = id;
+	if(window.MotorI18n && typeof window.MotorI18n.setLang == 'function'){
+		selected_lang = window.MotorI18n.setLang(id);
+	}else{
+		try{ localStorage.setItem('lang', id); }catch(e){}
+	}
 	jsStart();
 }
 
@@ -1282,10 +1287,10 @@ function shareCurrentCalc(){
 		navigator.clipboard.writeText(link).then(function(){
 			calcStatusMessage(lang['share_ready_'+selected_lang]);
 		}).catch(function(){
-			window.prompt('Скопируйте ссылку:', link);
+			window.prompt((window.MotorI18n && window.MotorI18n.t ? window.MotorI18n.t('copy_link_prompt') : 'Copy this link:'), link);
 		});
 	}else{
-		window.prompt('Скопируйте ссылку:', link);
+		window.prompt((window.MotorI18n && window.MotorI18n.t ? window.MotorI18n.t('copy_link_prompt') : 'Copy this link:'), link);
 	}
 }
 

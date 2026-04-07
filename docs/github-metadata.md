@@ -57,3 +57,34 @@ First public baseline release of MotorLab.
 2. Confirm README reflects current production/demo URL state.
 3. Create tag `v1.0.3` from the intended release commit.
 4. Publish GitHub Release using the notes draft above.
+
+---
+
+# Рекомендации по GitHub-метаданным
+
+Используйте этот файл как готовую памятку при настройке публичного репозитория.
+
+## Описание репозитория
+MotorLab — веб-инструмент для проектирования BLDC-двигателей: обмотки, визуализация, инженерные проверки, PWA и опциональная облачная синхронизация через Supabase.
+
+## Поле Website
+- Если есть стабильный прод-URL — укажите его.
+- Если ещё нет стабильного домена — оставьте поле пустым до публикации.
+
+## Рекомендуемые Topics
+- `bldc`
+- `electric-motor`
+- `motor-design`
+- `winding`
+- `calculator`
+- `pwa`
+- `supabase`
+- `javascript`
+- `engineering-tools`
+- `offline-first`
+
+## Чеклист релиза
+1. Выбрать финальную лицензию и добавить файл `LICENSE`.
+2. Проверить актуальность README (URL, статус, инструкции).
+3. Создать tag релиза (например, `v1.0.3`).
+4. Опубликовать GitHub Release с заметками изменений.

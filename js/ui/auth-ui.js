@@ -2,7 +2,12 @@
   var root = window.MotorProduct = window.MotorProduct || {};
 
   function analytics(){ return root.analytics; }
-  function isEn(){ return (window.selected_lang || '').toLowerCase() === 'en'; }
+  function isEn(){
+    if(window.MotorI18n && typeof window.MotorI18n.getLang === 'function'){
+      return window.MotorI18n.getLang() === 'en';
+    }
+    return (window.selected_lang || '').toLowerCase() === 'en';
+  }
   function t(ru, en){ return isEn() ? en : ru; }
 
   function ensureModal(){
