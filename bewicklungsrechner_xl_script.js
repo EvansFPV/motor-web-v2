@@ -91,6 +91,10 @@ var currentResultMeta = {
 };
 var SAVED_CALC_KEY = 'winding_saved_calculations_v1';
 var USER_PRESETS_KEY = 'winding_user_presets_v1';
+var _lastCalcN = 0;
+var _lastCalcP = 0;
+var _calcBusy = false;
+var _toastTimer = null;
 
 
 
@@ -715,9 +719,9 @@ function jsStart(){
 	var form = ''
 	form += '<form style="margin:auto;" name="Windungsrechner" action="javascript:return false;">';
 	form += '<label for="Nuten" id="nuten_t">'+lang['nuten_'+selected_lang]+'</label>';
-	form += '<input size="3"  maxlength="2" id="Nuten" name="Nuten" onchange="checkSPS(this.value,document.Windungsrechner.Pole.value,true);" />';
+	form += '<input type="number" inputmode="numeric" min="3" max="999" step="3" size="4" maxlength="3" id="Nuten" name="Nuten" autocomplete="off" placeholder="12" onfocus="this.select()" onchange="checkSPS(this.value,document.Windungsrechner.Pole.value,true); _checkStale();" />';
 	form += '<label for="Pole">'+lang['pole_'+selected_lang]+'</label>';
-	form += '<input maxlength="3" size="3" id="Pole" name="Pole" onchange="checkSPS(document.Windungsrechner.Nuten.value,this.value,true); checkVerteilt();" />';
+	form += '<input type="number" inputmode="numeric" min="2" max="999" step="2" size="4" maxlength="3" id="Pole" name="Pole" autocomplete="off" placeholder="14" onfocus="this.select()" onchange="checkSPS(document.Windungsrechner.Nuten.value,this.value,true); checkVerteilt(); _checkStale();" />';
 	form += '<span id="schalti"><select id="schalt">';
 	form += '<option value="-">D</option>';
 	form += '<option value="Y">Y</option>';
@@ -2682,6 +2686,7 @@ function Schema_ausgeben(nuten,pole,schema,fehler,SPS,schema_y){
 	if(!s_advanced){
 		gen_SAnzeige();
 	}
+	_postCalcUX();
 }
 
 function Wickel_Faktor_zeigen(){
@@ -4235,10 +4240,46 @@ function WF_FFT(schema,SPS){
 }
 
 function blink(id){
-	var inpute = document.getElementById(id);
-	inpute.style.backgroundColor="#E7796D";
-	setTimeout('document.getElementById("'+id+'").style.backgroundColor=(document.documentElement.classList.contains("theme-dark")?"#111B2F":"#FFF")',300);
-	
+	var el = document.getElementById(id);
+	if(!el) return;
+	el.style.backgroundColor = '';
+	el.classList.add('input-error');
+	el.setAttribute('aria-invalid', 'true');
+	var clearErr = function(){
+		el.classList.remove('input-error');
+		el.removeAttribute('aria-invalid');
+		var msg = document.getElementById('ferr_'+id);
+		if(msg) msg.remove();
+		el.removeEventListener('input', clearErr);
+		el.removeEventListener('change', clearErr);
+	};
+	el.addEventListener('input', clearErr);
+	el.addEventListener('change', clearErr);
+}
+
+function _showFieldError(id, msg){
+	blink(id);
+	var existingMsg = document.getElementById('ferr_'+id);
+	if(existingMsg) existingMsg.remove();
+	var el = document.getElementById(id);
+	if(!el) return;
+	var errEl = document.createElement('span');
+	errEl.id = 'ferr_'+id;
+	errEl.className = 'field-error-msg';
+	errEl.textContent = msg;
+	el.parentNode && el.parentNode.insertBefore(errEl, el.nextSibling);
+}
+
+function clearResult(){
+	var snap = null;
+	if(schemeCalculated && nutenx && polex){
+		snap = buildCurrentPayload();
+	}
+	if(document.getElementById('Ergebnis')){
+		document.getElementById('Ergebnis').innerHTML = '';
+	}
+	clear();
+	if(snap) _showClearToast(snap);
 }
 
 function clear(){
@@ -4280,38 +4321,138 @@ function clear(){
 		currentResultMeta.magnet = false;
 		currentResultMeta.schema = '';
 		schemeCalculated = false;
-	
+		// Remove result badges from tabs
+		var _tabs = document.querySelectorAll('.tab_btn');
+		for(var _ci=0;_ci<_tabs.length;_ci++){
+			_tabs[_ci].classList.remove('has_results');
+		}
+		var _mBtn = document.getElementById('mobileCalcBtn');
+		if(_mBtn){ _mBtn.classList.remove('has_calc'); _mBtn.removeAttribute('data-np'); }
 }
 
+function _setCalcLoading(on){
+	var btn = document.getElementById('Berechnen');
+	var mBtn = document.getElementById('mobileCalcBtn');
+	if(btn){
+		btn.disabled = !!on;
+		btn.classList.toggle('is_calculating', !!on);
+	}
+	if(mBtn){
+		mBtn.disabled = !!on;
+	}
+	_calcBusy = !!on;
+}
+
+function _checkStale(){
+	if(!schemeCalculated || !_lastCalcN || !_lastCalcP) return;
+	var nEl = document.getElementById('Nuten');
+	var pEl = document.getElementById('Pole');
+	if(!nEl || !pEl) return;
+	var n = parseInt(nEl.value, 10);
+	var p = parseInt(pEl.value, 10);
+	var stale = (n !== _lastCalcN || p !== _lastCalcP);
+	var staleIds = ['Rasten','Ergebnis','winding_assessment','engineering_tools','magnet_advice','enhanced_view','canvas_container'];
+	for(var i=0;i<staleIds.length;i++){
+		var s = document.getElementById(staleIds[i]);
+		if(s) s.classList.toggle('is_stale', stale);
+	}
+	var calcTab = document.querySelector('.tab_btn[data-tab-target="tab_calc"]');
+	if(calcTab) calcTab.classList.toggle('has_stale', stale);
+}
+
+function _showClearToast(snap){
+	var toast = document.getElementById('ux-toast');
+	if(!toast) return;
+	clearTimeout(_toastTimer);
+	toast.innerHTML = '';
+	var msg = document.createElement('span');
+	msg.textContent = lang['cleared_'+selected_lang] || 'Результат очищен';
+	var undoBtn = document.createElement('button');
+	undoBtn.type = 'button';
+	undoBtn.className = 'toast-undo-btn';
+	undoBtn.textContent = lang['undo_'+selected_lang] || 'Отменить';
+	undoBtn.onclick = function(){ if(snap) applyPayload(snap); _hideToast(); };
+	toast.appendChild(msg);
+	toast.appendChild(undoBtn);
+	toast.classList.add('is_visible');
+	_toastTimer = setTimeout(_hideToast, 4000);
+}
+
+function _hideToast(){
+	clearTimeout(_toastTimer);
+	var toast = document.getElementById('ux-toast');
+	if(toast) toast.classList.remove('is_visible');
+}
+
+function _postCalcUX(){
+	_setCalcLoading(false);
+	// Store params for stale detection
+	_lastCalcN = nutenx;
+	_lastCalcP = polex;
+	// Remove stale indicators
+	var _staleIds = ['Rasten','Ergebnis','winding_assessment','engineering_tools','magnet_advice','enhanced_view','canvas_container'];
+	for(var _si=0;_si<_staleIds.length;_si++){
+		var _s = document.getElementById(_staleIds[_si]);
+		if(_s) _s.classList.remove('is_stale');
+	}
+	// Mark Visual/Compare tabs with "has results" indicator dot
+	var _tabs = document.querySelectorAll('.tab_btn');
+	for(var _ti=0;_ti<_tabs.length;_ti++){
+		var _t = _tabs[_ti].getAttribute('data-tab-target');
+		if(_t === 'tab_visual' || _t === 'tab_compare'){
+			_tabs[_ti].classList.add('has_results');
+		}
+		if(_t === 'tab_calc'){
+			_tabs[_ti].classList.remove('has_stale');
+		}
+	}
+	// Update mobile calc button with N/P label
+	var _mBtn = document.getElementById('mobileCalcBtn');
+	if(_mBtn && nutenx && polex){
+		_mBtn.setAttribute('data-np', nutenx+'/'+polex);
+		_mBtn.classList.add('has_calc');
+	}
+	// Smooth scroll to results on mobile
+	if(window.innerWidth <= 900){
+		var _rasten = document.getElementById('Rasten');
+		if(_rasten && _rasten.innerHTML){
+			setTimeout(function(){
+				_rasten.scrollIntoView({behavior:'smooth', block:'start'});
+			}, 180);
+		}
+	}
+}
 
 function berechnen() {
+	if(_calcBusy) return;
+	_setCalcLoading(true);
 	var form = document.Windungsrechner;
 	Nuten = eval( form.Nuten.value );
 	Pole  = eval( form.Pole.value );
-	
+
 	if( Nuten % 3 != 0 || Nuten < 3 ) {
-		document.getElementById('Ergebnis').innerHTML = lang['nut_3_teilbar_'+selected_lang];
+		_setCalcLoading(false);
+		_showFieldError('Nuten', lang['nut_3_teilbar_'+selected_lang]);
 		document.Windungsrechner.Nuten.focus();
 		document.Windungsrechner.Nuten.select();
-		blink(document.Windungsrechner.Nuten.id);
 		clear();
 		return;
 	}
 
 	if( Pole % 2 != 0 || Pole < 2 ) {
-		document.getElementById('Ergebnis').innerHTML  = lang['pol_grade_'+selected_lang];
+		_setCalcLoading(false);
+		_showFieldError('Pole', lang['pol_grade_'+selected_lang]);
 		document.Windungsrechner.Pole.focus();
 		document.Windungsrechner.Pole.select();
-		blink(document.Windungsrechner.Pole.id);
 		clear();
 		return;
 	}
-	
+
 	if( Pole == Nuten ) {
-		document.getElementById('Ergebnis').innerHTML  = lang['nut_pol_ungleich_'+selected_lang];
+		_setCalcLoading(false);
+		_showFieldError('Pole', lang['nut_pol_ungleich_'+selected_lang]);
 		document.Windungsrechner.Pole.focus();
 		document.Windungsrechner.Pole.select();
-		blink(document.Windungsrechner.Pole.id);
 		clear();
 		return;
 	}

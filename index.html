@@ -24,7 +24,7 @@
       }catch(e){}
     })();
   </script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="./bewicklungsrechner_xl_style.css" />
   <script>
     window.MotorProductConfig = window.MotorProductConfig || {
@@ -514,6 +514,24 @@
         setTimeout(function(){
           tapTarget.classList.remove("is_tap_btn");
         }, 150);
+        // Haptic feedback on mobile calc button
+        if (tapTarget.id === "mobileCalcBtn" || tapTarget.id === "Berechnen") {
+          if (navigator.vibrate) {
+            navigator.vibrate(12);
+          }
+        }
+      });
+
+      // Keyboard shortcut: Enter on Nuten/Pole inputs triggers Calculate
+      document.addEventListener("keydown", function(e){
+        if (e.key !== "Enter") return;
+        var active = document.activeElement;
+        if (!active) return;
+        if (active.id === "Nuten" || active.id === "Pole") {
+          e.preventDefault();
+          var btn = document.getElementById("Berechnen");
+          if (btn) btn.click();
+        }
       });
 
       var locale = (window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "ru";
