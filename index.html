@@ -39,7 +39,7 @@
   <div id="app-splash" aria-hidden="true">
     <div class="splash-inner">
       <img src="/icons/apple-touch-icon.png" alt="MotorLab icon" class="splash-logo" />
-      <div class="splash-title">MotorLab</div>
+      <div class="splash-title"><span class="brand_mark">MotorLab</span></div>
       <div class="splash-subtitle">Инструмент проектирования электродвигателей</div>
     </div>
   </div>
@@ -47,8 +47,8 @@
     <header class="app_header">
       <div class="header_row">
         <div>
-          <h1 data-i18n="title">MotorLab</h1>
-          <p data-i18n="subtitle">MotorLab — инструмент проектирования электродвигателей</p>
+          <h1 data-i18n="title"><span class="brand_mark">MotorLab</span></h1>
+          <p data-i18n="subtitle"><span class="brand_mark">MotorLab</span> — инструмент проектирования электродвигателей</p>
         </div>
         <div class="header_actions">
           <span id="userChip" class="user_chip is_guest">Гость</span>
@@ -276,7 +276,7 @@
               </table>
             </div>
             <p class="table_note" data-i18n="note_table">
-              Цвета ячеек: синий — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.
+              Цвета ячеек: зелёный — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.
             </p>
           </div>
         </details>
@@ -285,7 +285,7 @@
           <summary><span data-i18n="help_read">Как читать результат</span></summary>
           <div class="help_acc_body">
             <h2 data-i18n="help_phase_title">Что означают A/B/C и a/b/c</h2>
-            <p data-i18n="help_phase_1"><strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — синий, C — зелёный.</p>
+            <p data-i18n="help_phase_1"><strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — светло-зелёный, C — зелёный.</p>
             <p data-i18n="help_phase_2"><strong>Заглавная буква</strong> (A/B/C) и <strong>строчная</strong> (a/b/c) показывают противоположные направления тока в активной стороне катушки.</p>
             <p data-i18n="help_phase_3"><strong>Пример:</strong> если в схеме идут <code>A</code> и затем <code>a</code>, это одна и та же фаза, но с обратным направлением.</p>
             <p data-i18n="help_r3"><strong>Анимация намотки</strong> — пошаговая визуализация укладки.</p>
@@ -754,8 +754,8 @@
       }
       var i18nPayload = {
         ru: {
-          title: "MotorLab",
-          subtitle: "MotorLab — инструмент проектирования электродвигателей",
+          title: "<span class=\"brand_mark\">MotorLab</span>",
+          subtitle: "<span class=\"brand_mark\">MotorLab</span> — инструмент проектирования электродвигателей",
           tab_calc: "Калькулятор",
           tab_help: "Справка",
           tab_visual: "Визуализация",
@@ -806,10 +806,10 @@
           help_adv_card3: "<strong>Скос:</strong> задайте скос в пазах и включите чекбокс, если хотите учитывать скос.",
           help_adv_card4: "<strong>Применение:</strong> нажмите «Применить» и сравните обновленный коэффициент в таблице.",
           help_table: "Таблица типовых сочетаний",
-          note_table: "Цвета ячеек: синий — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.",
+          note_table: "Цвета ячеек: зелёный — хорошая комбинация, белый — рабочая, оранжевый — рабочая, но хуже, черный — нерабочая.",
           help_read: "Как читать результат",
           help_phase_title: "Что означают A/B/C и a/b/c",
-          help_phase_1: "<strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — синий, C — зелёный.",
+          help_phase_1: "<strong>A/B/C</strong> — три фазы обмотки. Цвета: A — красный, B — светло-зелёный, C — зелёный.",
           help_phase_2: "<strong>Заглавная буква</strong> (A/B/C) и <strong>строчная</strong> (a/b/c) показывают противоположные направления тока в активной стороне катушки.",
           help_phase_3: "<strong>Пример:</strong> если в схеме идут <code>A</code> и затем <code>a</code>, это одна и та же фаза, но с обратным направлением.",
           help_r3: "<strong>Анимация намотки</strong> — пошаговая визуализация укладки.",
@@ -860,8 +860,8 @@
           compare_empty: "Сначала выполните расчёт для построения метрик."
         },
         en: {
-          title: "MotorLab",
-          subtitle: "MotorLab — Electric Motor Design Tool",
+          title: "<span class=\"brand_mark\">MotorLab</span>",
+          subtitle: "<span class=\"brand_mark\">MotorLab</span> — Electric Motor Design Tool",
           tab_calc: "Calculator",
           tab_help: "Help",
           tab_visual: "Visual",
@@ -912,10 +912,10 @@
           help_adv_card3: "<strong>Skew:</strong> set skew in slots and enable checkbox if skew correction is needed.",
           help_adv_card4: "<strong>Apply:</strong> press Apply and compare updated values in the factor table.",
           help_table: "Typical Combinations Table (reference style)",
-          note_table: "Cell colors: blue — good, white — works, orange — works but worse, black — does not work.",
+          note_table: "Cell colors: green — good, white — works, orange — works but worse, black — does not work.",
           help_read: "How to read results",
           help_phase_title: "What A/B/C and a/b/c mean",
-          help_phase_1: "<strong>A/B/C</strong> are the three phases. Colors: A red, B blue, C green.",
+          help_phase_1: "<strong>A/B/C</strong> are the three phases. Colors: A red, B light green, C green.",
           help_phase_2: "<strong>Uppercase</strong> (A/B/C) and <strong>lowercase</strong> (a/b/c) indicate opposite current directions in the active coil side.",
           help_phase_3: "<strong>Example:</strong> sequence <code>A</code> then <code>a</code> is the same phase with reversed direction.",
           help_r3: "<strong>Winding animation</strong> — step-by-step winding sequence.",

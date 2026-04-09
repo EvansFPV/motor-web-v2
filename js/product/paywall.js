@@ -17,7 +17,7 @@
     modal.innerHTML = [
       '<div class="pro_paywall" role="dialog" aria-modal="true" aria-labelledby="proPaywallTitle">',
       '  <button type="button" class="pro_paywall_close" id="proPaywallClose" aria-label="Close">×</button>',
-      '  <h3 id="proPaywallTitle">MotorLab PRO</h3>',
+      '  <h3 id="proPaywallTitle"><span class="brand_mark">MotorLab</span> PRO</h3>',
       '  <p id="proPaywallReason" class="pro_paywall_reason"></p>',
       '  <ul class="pro_paywall_list">',
       '    <li>Безлимитные сохранения и пользовательские пресеты</li>',

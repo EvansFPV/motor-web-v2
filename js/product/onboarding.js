@@ -84,7 +84,7 @@
     host.innerHTML = [
       '<div class="onboarding_card">',
       ' <div class="onboarding_text">',
-      '   <strong>Добро пожаловать в MotorLab</strong>',
+      '   <strong>Добро пожаловать в <span class="brand_mark">MotorLab</span></strong>',
       '   <p>Быстрый старт: загрузите рабочий пример 9/12 или пройдите мини-тур.</p>',
       ' </div>',
       ' <div class="onboarding_actions">',
