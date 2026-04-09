@@ -7,7 +7,7 @@
   "orientation": "any",
   "background_color": "#0B1220",
   "theme_color": "#0B1220",
-  "description": "MotorLab — Winding & Magnet Calculator with visualization and offline mode.",
+  "description": "MotorLab — калькулятор обмоток и магнитов BLDC-моторов с визуализацией и офлайн-режимом.",
   "lang": "ru",
   "icons": [
     {

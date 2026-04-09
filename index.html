@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MotorLab</title>
-  <meta name="theme-color" content="#0B1220" />
+  <meta name="theme-color" content="#0D1117" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="MotorLab" />
@@ -39,7 +40,7 @@
     <div class="splash-inner">
       <img src="/icons/apple-touch-icon.png" alt="MotorLab icon" class="splash-logo" />
       <div class="splash-title">MotorLab</div>
-      <div class="splash-subtitle">Electric Motor Design Tool</div>
+      <div class="splash-subtitle">Инструмент проектирования электродвигателей</div>
     </div>
   </div>
   <main class="app">
@@ -57,22 +58,21 @@
           <button id="installBtn" class="install_btn" type="button" data-i18n="install_app" hidden>Установить на телефон/ПК</button>
           <button id="updateAppBtn" class="update_btn" type="button" data-i18n="update_app">Обновить приложение</button>
           <span id="updateStatus" class="update_status" hidden aria-live="polite"></span>
-          <button id="themeToggle" class="theme_btn" type="button" data-i18n="theme_dark" aria-label="Переключить тему">🌙</button>
-          <label for="lang-switch" hidden>Language</label>
-          <select id="lang-switch" class="lang_btn" aria-label="Language switcher">
-            <option value="ru">RU</option>
-            <option value="en">EN</option>
-          </select>
+          <button id="themeToggle" class="theme_btn" type="button" aria-label="Переключить тему"></button>
+          <div class="lang_switch" role="group" aria-label="Выбор языка">
+            <button type="button" class="lang_switch_btn is_active" data-lang="ru">RU</button>
+            <button type="button" class="lang_switch_btn" data-lang="en">EN</button>
+          </div>
         </div>
       </div>
     </header>
 
     <nav class="tabs" aria-label="Main sections">
-      <button class="tab_btn is_active" data-tab-target="tab_calc" type="button" data-i18n="tab_calc">Calculator</button>
-      <button class="tab_btn" data-tab-target="tab_visual" type="button" data-i18n="tab_visual">Visual</button>
-      <button class="tab_btn" data-tab-target="tab_compare" type="button" data-i18n="tab_compare">Compare</button>
-      <button class="tab_btn" data-tab-target="tab_projects" type="button" data-i18n="tab_projects">Projects</button>
-      <button class="tab_btn" data-tab-target="tab_help" type="button" data-i18n="tab_help">Help</button>
+      <button class="tab_btn is_active" data-tab-target="tab_calc" type="button"><span class="tab_icon tab_icon_calc"></span><span class="tab_label" data-i18n="tab_calc">Калькулятор</span></button>
+      <button class="tab_btn" data-tab-target="tab_visual" type="button"><span class="tab_icon tab_icon_visual"></span><span class="tab_label" data-i18n="tab_visual">Визуализация</span></button>
+      <button class="tab_btn" data-tab-target="tab_compare" type="button"><span class="tab_icon tab_icon_compare"></span><span class="tab_label" data-i18n="tab_compare">Сравнение</span></button>
+      <button class="tab_btn" data-tab-target="tab_projects" type="button"><span class="tab_icon tab_icon_projects"></span><span class="tab_label" data-i18n="tab_projects">Проекты</span></button>
+      <button class="tab_btn" data-tab-target="tab_help" type="button"><span class="tab_icon tab_icon_help"></span><span class="tab_label" data-i18n="tab_help">Справка</span></button>
     </nav>
 
     <section id="tab_calc" class="tab_panel is_active">
@@ -371,6 +371,8 @@
       <div id="history_list" class="history_list"></div>
     </section>
   </main>
+
+  <div id="ux-toast" class="ux_toast" role="status" aria-live="polite"></div>
 
   <div id="tourOverlay" class="tour_overlay" hidden>
     <div class="tour_modal" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
@@ -1007,15 +1009,12 @@
         if (window.MotorI18n && typeof window.MotorI18n.applyI18n === "function") {
           window.MotorI18n.applyI18n(document);
         }
-        var select = document.getElementById("lang-switch");
-        if (select && select.value !== locale) {
-          select.value = locale;
-        }
+        syncLangSwitchUI(locale);
         var themeBtn = document.getElementById("themeToggle");
         if (themeBtn) {
-          themeBtn.textContent = "🌙";
-          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
-          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
+          themeBtn.classList.toggle("is_dark", currentTheme === "dark");
+          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Светлая тема") : tr("theme_dark", "Тёмная тема"));
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Светлая тема") : tr("theme_dark", "Тёмная тема"));
         }
         if (typeof setlang === "function") {
           setlang(locale);
@@ -1226,11 +1225,17 @@
 
       window.addEventListener("resize", syncHelpAccordion);
 
-      var langSwitch = document.getElementById("lang-switch");
-      if (langSwitch) {
-        langSwitch.addEventListener("change", function () {
-          applyLocale(this.value);
+      var langSwitchBtns = document.querySelectorAll(".lang_switch_btn");
+      for (var li = 0; li < langSwitchBtns.length; li++) {
+        langSwitchBtns[li].addEventListener("click", function () {
+          applyLocale(this.getAttribute("data-lang"));
         });
+      }
+      function syncLangSwitchUI(lang){
+        for (var li = 0; li < langSwitchBtns.length; li++) {
+          var active = langSwitchBtns[li].getAttribute("data-lang") === lang;
+          langSwitchBtns[li].classList.toggle("is_active", active);
+        }
       }
       function applyTheme(theme){
         currentTheme = (theme === "dark") ? "dark" : "light";
@@ -1238,9 +1243,9 @@
         try { localStorage.setItem("ui_theme", currentTheme); } catch (e) {}
         var themeBtn = document.getElementById("themeToggle");
         if (themeBtn) {
-          themeBtn.textContent = "🌙";
-          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
-          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Light theme") : tr("theme_dark", "Dark theme"));
+          themeBtn.classList.toggle("is_dark", currentTheme === "dark");
+          themeBtn.setAttribute("title", currentTheme === "dark" ? tr("theme_light", "Светлая тема") : tr("theme_dark", "Тёмная тема"));
+          themeBtn.setAttribute("aria-label", currentTheme === "dark" ? tr("theme_light", "Светлая тема") : tr("theme_dark", "Тёмная тема"));
         }
       }
       var themeToggle = document.getElementById("themeToggle");
@@ -1666,6 +1671,7 @@
           }
         } catch (e) {}
       }
+      applyTheme(currentTheme);
       applyLocale((window.MotorI18n && window.MotorI18n.getLang) ? window.MotorI18n.getLang() : "ru");
       if (window.MotorProduct && window.MotorProduct.auth) {
         window.MotorProduct.auth.init().then(function(){

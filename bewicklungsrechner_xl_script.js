@@ -2699,9 +2699,9 @@ function Wickel_Faktor_zeigen(){
 	currentResultMeta.wfNumeric = (typeof w_factor == 'number') ? w_factor : parseFloat(currentResultMeta.wf);
 	
 	if(document.getElementById('wf_tabelle')){
-		einf_erw = '<span id="advanced" onclick="z_einfach();"> <span style="font-size:14px;">&uArr;</span> '+lang['einfach_'+selected_lang]+'</span>';
+		einf_erw = '<button type="button" id="advanced" class="adv_toggle_btn is_open" onclick="z_einfach();">'+lang['einfach_'+selected_lang]+'</button>';
 	}else{
-		einf_erw = '<span id="advanced" onclick="advanced();"> <span style="font-size:14px;">&dArr;</span> '+lang['erweitert_'+selected_lang]+'</span>';
+		einf_erw = '<button type="button" id="advanced" class="adv_toggle_btn" onclick="advanced();">'+lang['erweitert_'+selected_lang]+'</button>';
 	}
 	
 	document.getElementById('Rasten').innerHTML += '<br />'+lang['wickelfaktor_'+selected_lang]+'<span style="font-weight:bold;">'+w_factor+'</span> '+einf_erw;
@@ -2759,8 +2759,12 @@ function advanced(){
 		}
 		updateMagnetAdvisor();
 		s_advanced = true;
-		document.getElementById('advanced').innerHTML=' <span style="font-size:14px;">&uArr;</span> '+lang['einfach_'+selected_lang];
-		document.getElementById('advanced').onclick= function(){z_einfach();}
+		var advBtn = document.getElementById('advanced');
+		if(advBtn){
+			advBtn.textContent = lang['einfach_'+selected_lang];
+			advBtn.className = 'adv_toggle_btn is_open';
+			advBtn.onclick = function(){ z_einfach(); };
+		}
 		gen_SAnzeige();
 		gen_tabelle(WF);
 	}
@@ -2915,9 +2919,12 @@ function Tanzeigen(a_count){
 function z_einfach(){
 	s_advanced = false;
 	document.getElementById('nutfacktor').innerHTML = '';
-	document.getElementById('advanced').innerHTML=' <span style="font-size:14px;">&dArr;</span> '+lang['erweitert_'+selected_lang];
-	document.getElementById('advanced').onclick= function(){advanced();}
-	
+	var advBtn = document.getElementById('advanced');
+	if(advBtn){
+		advBtn.textContent = lang['erweitert_'+selected_lang];
+		advBtn.className = 'adv_toggle_btn';
+		advBtn.onclick = function(){ advanced(); };
+	}
 }
 
 function gen_tabelle(WFA){
