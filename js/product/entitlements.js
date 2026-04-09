@@ -1,6 +1,6 @@
 (function(){
   var root = window.MotorProduct = window.MotorProduct || {};
-  var STORAGE_KEY = 'motorwebapp_entitlements_v1';
+  var STORAGE_KEY = 'motorlab_entitlements_v1';
 
   function nowIso(){
     return new Date().toISOString();

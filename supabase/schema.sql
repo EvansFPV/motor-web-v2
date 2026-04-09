@@ -1,4 +1,4 @@
--- motorwebapp release 1.2.0-beta
+-- MotorLab release 1.2.0-beta
 -- Supabase schema for auth-linked profiles/projects/subscriptions
 
 create table if not exists public.profiles (

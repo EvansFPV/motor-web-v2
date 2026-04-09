@@ -1,6 +1,6 @@
 (function(){
   var root = window.MotorProduct = window.MotorProduct || {};
-  var KEY = 'motorwebapp_onboarding_v1';
+  var KEY = 'motorlab_onboarding_v1';
 
   function analytics(){ return root.analytics; }
 
@@ -84,7 +84,7 @@
     host.innerHTML = [
       '<div class="onboarding_card">',
       ' <div class="onboarding_text">',
-      '   <strong>Добро пожаловать в MotorWebApp</strong>',
+      '   <strong>Добро пожаловать в MotorLab</strong>',
       '   <p>Быстрый старт: загрузите рабочий пример 9/12 или пройдите мини-тур.</p>',
       ' </div>',
       ' <div class="onboarding_actions">',
