@@ -739,14 +739,12 @@ function jsStart(){
 	form += '<option value="-">D</option>';
 	form += '<option value="Y">Y</option>';
 	form += '</select></span>';
-	form += '<input type="submit" onclick="berechnen(); return false;" id="Berechnen" value="'+lang['berechnen_'+selected_lang]+'" />';
 	form += '<button type="button" id="erweitert_einfach" class="adv_toggle_btn" onclick="schema_eingeben();">'+lang['erweitert_'+selected_lang]+'</button>';
 	form += '</form><span id="info"></span>';
 	
 	mainContainer.innerHTML += sprachwahl;
 	mainContainer.innerHTML += form;
 	mainContainer.innerHTML += '<div id="calc_actions"></div><div id="Rasten"></div><div id="insights_row"><div id="engineering_tools"></div><div id="winding_assessment"></div><div id="magnet_advice"></div></div><div id="nutfacktor"></div><div id ="steps"></div><div id="Ergebnis"></div><div id="canvas_container"></div><div id="enhanced_controls"></div><div id="enhanced_view"></div><div id="link_container"></div>';
-	mainContainer.innerHTML += '<div id="mobile_calc_bar"><button type="button" id="mobileCalcBtn" onclick="if(document.getElementById(\'Berechnen\')){document.getElementById(\'Berechnen\').click();}">'+lang['berechnen_'+selected_lang]+'</button></div>';
 	setupEnhancedControls();
 	renderCalcActions();
 	applyWorkspaceLayout();
@@ -850,7 +848,6 @@ function applyWorkspaceLayout(){
 	var windingAssessment = document.getElementById('winding_assessment');
 	var magnetAdvice = document.getElementById('magnet_advice');
 	var links = document.getElementById('link_container');
-	var mobileBar = document.getElementById('mobile_calc_bar');
 	var layout = document.getElementById('mlCalcLayout');
 
 	if(!layout){
@@ -895,7 +892,6 @@ function applyWorkspaceLayout(){
 
 	layout.appendChild(left);
 	layout.appendChild(right);
-	_appendIfExists(calcHost, mobileBar);
 
 	var visualHost = document.getElementById('visual_workspace');
 	var steps = document.getElementById('steps');
@@ -4352,20 +4348,9 @@ function clear(){
 		for(var _ci=0;_ci<_tabs.length;_ci++){
 			_tabs[_ci].classList.remove('has_results');
 		}
-		var _mBtn = document.getElementById('mobileCalcBtn');
-		if(_mBtn){ _mBtn.classList.remove('has_calc'); _mBtn.removeAttribute('data-np'); }
 }
 
 function _setCalcLoading(on){
-	var btn = document.getElementById('Berechnen');
-	var mBtn = document.getElementById('mobileCalcBtn');
-	if(btn){
-		btn.disabled = !!on;
-		btn.classList.toggle('is_calculating', !!on);
-	}
-	if(mBtn){
-		mBtn.disabled = !!on;
-	}
 	_calcBusy = !!on;
 }
 
@@ -4432,12 +4417,6 @@ function _postCalcUX(){
 			_tabs[_ti].classList.remove('has_stale');
 		}
 	}
-	// Update mobile calc button with N/P label
-	var _mBtn = document.getElementById('mobileCalcBtn');
-	if(_mBtn && nutenx && polex){
-		_mBtn.setAttribute('data-np', nutenx+'/'+polex);
-		_mBtn.classList.add('has_calc');
-	}
 	// Smooth scroll to results on mobile
 	if(window.innerWidth <= 900){
 		var _rasten = document.getElementById('Rasten');
@@ -4452,9 +4431,10 @@ function _postCalcUX(){
 function berechnen() {
 	if(_calcBusy) return;
 	_setCalcLoading(true);
+	try {
 	var form = document.Windungsrechner;
-	Nuten = eval( form.Nuten.value );
-	Pole  = eval( form.Pole.value );
+	Nuten = parseFloat( form.Nuten.value );
+	Pole  = parseFloat( form.Pole.value );
 
 	if( Nuten % 3 != 0 || Nuten < 3 ) {
 		_setCalcLoading(false);
@@ -4580,6 +4560,11 @@ function berechnen() {
 		}else{
 			Schema_ausgeben(Nuten,Pole,schema,false,false,schema);
 		}
+	}
+
+	} catch(e) {
+		_setCalcLoading(false);
+		throw e;
 	}
 
 }
