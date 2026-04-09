@@ -4630,7 +4630,7 @@ html.theme-dark .eng_compare_table td:first-child{
   }
 }
 
-/* ===== Mobile Stabilization Patch (v1.1.0-beta) ===== */
+/* ===== Mobile Stabilization Patch (v1.2.0-beta) ===== */
 @media (max-width: 900px){
   .app{
     width:100%;

@@ -1,13 +1,26 @@
-# Changelog
+# Журнал изменений
 
-All notable changes to this project should be documented in this file.
+Все заметные изменения проекта фиксируются в этом файле.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+а сам проект следует [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Заметки
+- Работа после `1.2.0-beta`.
+
+## [1.2.0-beta] - 2026-04-09
+### Added
+- Полная русская локализация документации с русским разделом в начале каждого основного markdown-файла.
+- Новый черновик GitHub Release для `1.2.0-beta`.
+
+### Changed
+- `README.md`, release notes и инструкции по публикации синхронизированы по версии `1.2.0-beta`.
+- Документация по Vercel и выбору лицензии приведена к единому двуязычному формату.
+
 ### Notes
-- Work in progress after `1.1.0-beta`.
+- Это **beta**-релиз документации и релизных материалов.
+- Ядро расчётной логики приложения намеренно не менялось в рамках этой правки.
 
 ## [1.1.0-beta] - 2026-04-07
 ### Added
