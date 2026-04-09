@@ -1483,6 +1483,10 @@
         var calcBtn = document.getElementById("Berechnen");
         if (calcBtn) {
           calcBtn.click();
+          return;
+        }
+        if (typeof berechnen === "function") {
+          berechnen();
         }
       }
 
