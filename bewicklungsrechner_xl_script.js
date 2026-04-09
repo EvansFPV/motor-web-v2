@@ -727,7 +727,7 @@ function jsStart(){
 	form += '<option value="Y">Y</option>';
 	form += '</select></span>';
 	form += '<input type="submit" onclick="berechnen(); return false;" id="Berechnen" value="'+lang['berechnen_'+selected_lang]+'" />';
-	form += '<span id="erweitert_einfach" style=" font-size:12px;" onclick="schema_eingeben();"> &lArr; '+lang['erweitert_'+selected_lang]+'</span>';
+	form += '<button type="button" id="erweitert_einfach" class="adv_toggle_btn" onclick="schema_eingeben();">'+lang['erweitert_'+selected_lang]+'</button>';
 	form += '</form><span id="info"></span>';
 	
 	mainContainer.innerHTML += sprachwahl;
@@ -2410,8 +2410,8 @@ function schema_eingeben(){
 	}else if(verteilt){
 		document.getElementById('Nuten').value = verteilt;
 	}
-	document.getElementById('erweitert_einfach').innerHTML =' &lArr; '+lang['einfach_'+selected_lang];
-	document.getElementById('erweitert_einfach').onclick=function(){nut_pol_eingeben();}
+	var eEl=document.getElementById('erweitert_einfach');
+	if(eEl){eEl.textContent=lang['einfach_'+selected_lang];eEl.classList.add('is_open');eEl.onclick=function(){nut_pol_eingeben();}}
 	document.getElementById('Berechnen').onclick = function(){mit_schema(); return false;}
 	checkSPS(document.Windungsrechner.Nuten.value,document.Windungsrechner.Pole.value,false);
 	checkVerteilt();
@@ -2427,8 +2427,8 @@ function nut_pol_eingeben(){
 		var nutZahL = verteilt.split('|');
 		document.getElementById('Nuten').value = nutZahL.length-1;
 	}
-	document.getElementById('erweitert_einfach').innerHTML =' &lArr; '+lang['erweitert_'+selected_lang];
-	document.getElementById('erweitert_einfach').onclick=function(){schema_eingeben();}
+	var eEl2=document.getElementById('erweitert_einfach');
+	if(eEl2){eEl2.textContent=lang['erweitert_'+selected_lang];eEl2.classList.remove('is_open');eEl2.onclick=function(){schema_eingeben();}}
 	document.getElementById('Berechnen').onclick = function(){berechnen(document.Windungsrechner); return false;}
 	fehler = false;
 	checkSPS(document.Windungsrechner.Nuten.value,document.Windungsrechner.Pole.value,false);
