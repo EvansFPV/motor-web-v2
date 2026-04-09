@@ -4323,6 +4323,7 @@ function clear(){
 		if(document.getElementById('magnet_advice')){
 			document.getElementById('magnet_advice').innerHTML = '';
 		}
+		s_advanced = false;
 		currentResultMeta.kgv = false;
 		currentResultMeta.wf = false;
 		currentResultMeta.wfNumeric = false;

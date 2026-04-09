@@ -2634,8 +2634,8 @@ html.theme-dark .history_search{
   border-color:#30363D;
 }
 
-#Nuten,
-#Pole{
+#jsContainer #Nuten,
+#jsContainer #Pole{
   font-size:20px;
   font-weight:700;
   text-align:center;
@@ -3845,7 +3845,7 @@ html.theme-dark .tabs{
   z-index:42;
 }
 
-html.theme-dark .tab_btn{
+.tab_btn{
   border:none;
   border-bottom:3px solid transparent;
   background:transparent;
@@ -3857,7 +3857,7 @@ html.theme-dark .tab_btn{
   margin-bottom:-2px;
 }
 
-html.theme-dark .tab_btn.is_active{
+.tab_btn.is_active{
   background:transparent;
   color:var(--t-tab-active);
   border-bottom-color:var(--t-tab-indicator);
@@ -3865,7 +3865,7 @@ html.theme-dark .tab_btn.is_active{
   font-weight:700;
 }
 
-html.theme-dark .tab_panel{
+.tab_panel{
   padding:14px;
 }
 
@@ -4116,7 +4116,7 @@ html.theme-dark .help_panel{
     padding:0 8px;
   }
 
-  html.theme-dark .tab_btn{
+  .tab_btn{
     min-height:48px;
     font-size:11px;
     padding:12px 8px 10px;
@@ -4128,14 +4128,14 @@ html.theme-dark .help_panel{
     border-radius:0;
   }
 
-  html.theme-dark .tab_btn.is_active{
+  .tab_btn.is_active{
     background:transparent;
     border-bottom-color:var(--t-tab-indicator);
     color:var(--t-tab-active);
     box-shadow:none;
   }
 
-  html.theme-dark .tab_panel{
+  .tab_panel{
     padding:10px;
   }
 
