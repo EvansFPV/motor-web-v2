@@ -4294,11 +4294,16 @@ function clear(){
 			document.getElementById('Rasten').innerHTML ='';
 		}
 		if(document.getElementById('steps')){
-			document.getElementById('canvas_container').removeChild(document.getElementById("statorCanvas"));
+			var statorCanvas = document.getElementById("statorCanvas");
+			var canvasContainer = document.getElementById('canvas_container');
+			if(statorCanvas && canvasContainer && canvasContainer.contains(statorCanvas)){
+				canvasContainer.removeChild(statorCanvas);
+			}
 			document.getElementById('steps').innerHTML = '';
 		}
-		if(document.getElementById("statorCanvas2")){
-			mainContainer.removeChild(document.getElementById("statorCanvas2"));
+		var statorCanvas2 = document.getElementById("statorCanvas2");
+		if(statorCanvas2 && mainContainer && mainContainer.contains(statorCanvas2)){
+			mainContainer.removeChild(statorCanvas2);
 		}
 		if(document.getElementById('advanced')){
 			document.getElementById('advanced').innerHTML="";

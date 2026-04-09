@@ -246,15 +246,16 @@ button{
 }
 
 .app{
-  width:min(1180px, calc(100vw - 24px));
-  margin:18px auto 24px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:16px;
-  box-shadow:0 10px 35px rgba(26,39,68,0.09);
+  width:min(1320px, calc(100vw - 24px));
+  margin:14px auto 22px;
+  background:var(--t-surface);
+  border:1px solid var(--t-border);
+  border-radius:18px;
+  box-shadow:var(--t-shadow-lg);
   overflow:hidden;
   animation:fadeSlideUp var(--dur-slow) var(--ease) both;
   overscroll-behavior-x:none;
+  transition:background var(--dur-mid) var(--ease), border-color var(--dur-mid) var(--ease), box-shadow var(--dur-mid) var(--ease);
 }
 
 .app_header{
@@ -2421,11 +2422,7 @@ html.theme-dark body{
   color:#E6EDF3;
 }
 
-html.theme-dark .app{
-  background:#0D1117;
-  border-color:#21262D;
-  box-shadow:0 0 0 1px rgba(63,185,80,.05), 0 20px 50px rgba(0,0,0,.6);
-}
+/* dark .app styles consolidated below at the workspace layout section */
 
 /* Header dark — now handled via --t-* tokens in main rules */
 html.theme-dark .app_header{
@@ -3809,11 +3806,8 @@ html.theme-dark body{
 }
 
 html.theme-dark .app{
-  width:min(1320px, calc(100vw - 24px));
-  margin:14px auto 22px;
-  border:1px solid #21262D;
-  border-radius:18px;
   background:#0D1117;
+  border-color:#21262D;
   box-shadow:0 0 0 1px rgba(63,185,80,.04), 0 20px 50px rgba(0,0,0,.65);
 }
 
@@ -4145,7 +4139,7 @@ html.theme-dark .help_panel{
     padding:10px;
   }
 
-  html.theme-dark #jsContainer form{
+  #jsContainer form{
     grid-template-columns:1fr;
   }
 
@@ -5091,6 +5085,7 @@ html.theme-dark .help_acc_item > summary{
   margin-top:3px;
   animation:fadeSlideUp .2s var(--ease) both;
   line-height:1.3;
+  grid-column:1 / -1;
 }
 
 /* Stale results overlay */
