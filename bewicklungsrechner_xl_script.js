@@ -95,6 +95,19 @@ var _lastCalcN = 0;
 var _lastCalcP = 0;
 var _calcBusy = false;
 var _toastTimer = null;
+var _autoCalcTimer = null;
+
+function _scheduleAutoCalc(){
+  if(_autoCalcTimer) clearTimeout(_autoCalcTimer);
+  _autoCalcTimer = setTimeout(function(){
+    _autoCalcTimer = null;
+    var f = document.Windungsrechner;
+    if(!f) return;
+    var n = parseInt(f.Nuten.value, 10);
+    var p = parseInt(f.Pole.value, 10);
+    if(n >= 3 && p >= 2) berechnen();
+  }, 600);
+}
 
 
 
@@ -719,10 +732,10 @@ function jsStart(){
 	var form = ''
 	form += '<form style="margin:auto;" name="Windungsrechner" action="javascript:return false;">';
 	form += '<label for="Nuten" id="nuten_t">'+lang['nuten_'+selected_lang]+'</label>';
-	form += '<input type="number" inputmode="numeric" min="3" max="999" step="3" size="4" maxlength="3" id="Nuten" name="Nuten" autocomplete="off" placeholder="12" onfocus="this.select()" onchange="checkSPS(this.value,document.Windungsrechner.Pole.value,true); _checkStale();" />';
+	form += '<input type="number" inputmode="numeric" min="3" max="999" step="3" size="4" maxlength="3" id="Nuten" name="Nuten" autocomplete="off" placeholder="12" onfocus="this.select()" onchange="checkSPS(this.value,document.Windungsrechner.Pole.value,true); _checkStale();" oninput="_scheduleAutoCalc();" />';
 	form += '<label for="Pole">'+lang['pole_'+selected_lang]+'</label>';
-	form += '<input type="number" inputmode="numeric" min="2" max="999" step="2" size="4" maxlength="3" id="Pole" name="Pole" autocomplete="off" placeholder="14" onfocus="this.select()" onchange="checkSPS(document.Windungsrechner.Nuten.value,this.value,true); checkVerteilt(); _checkStale();" />';
-	form += '<span id="schalti"><select id="schalt">';
+	form += '<input type="number" inputmode="numeric" min="2" max="999" step="2" size="4" maxlength="3" id="Pole" name="Pole" autocomplete="off" placeholder="14" onfocus="this.select()" onchange="checkSPS(document.Windungsrechner.Nuten.value,this.value,true); checkVerteilt(); _checkStale();" oninput="_scheduleAutoCalc();" />';
+	form += '<span id="schalti"><select id="schalt" onchange="_scheduleAutoCalc();">';
 	form += '<option value="-">D</option>';
 	form += '<option value="Y">Y</option>';
 	form += '</select></span>';
